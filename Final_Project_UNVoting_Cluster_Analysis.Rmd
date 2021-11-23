@@ -1,0 +1,123 @@
+---
+title: "UN Voting Cluster Analysis"
+author: "Erin Lemons (eml129), Kenton Thibault (akt44), Bria Pullin (bnp21)"
+date: "11/22/2021"
+output: html_document
+urlcolor: blue
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r include = FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+```
+
+\begin{center}
+\Huge{Foreign Military Education Networks and Influence in Africa Today}
+
+\Huge{2017 UN Voting Cluster Analysis}
+\end{center}
+
+\vspace{0.1in}
+
+```{r library}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(haven)
+options(scipen = 999)
+library(ggthemes)
+library(sf)
+library(patchwork)
+library(lubridate)
+library(tidycensus)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(tidymodels)
+library(rpart)
+library(rpart.plot)
+library(janitor)
+library(themis)
+library(vip)
+library(ranger)
+library(factoextra)
+```
+
+```{r formatting data and visualizing}
+UNvoting <- read_csv("UNVotes.csv")
+
+Africa_ccodes = c("2", "200", "220", "365", "710", "402", "403", "404", "411", "420", "432", "433", "434", "435", "436", "437", "438", "439", "450", "451", "452", "461", "471", "475", "481", "482", "483", "484", "490", "500", "501", "510", "516", "517", "520", "522", "530", "531", "540", "541", "551", "552", "553", "560", "565", "570", "571", "572", "580", "581", "590", "591", "600", "615", "616", "620", "625", "626", "651")
+
+UN_Imp_Votes_Org <- UNvoting %>%
+  filter(session==72) %>%
+  filter(importantvote==1) %>%
+  filter(ccode %in% Africa_ccodes) %>%
+  select(resid, ccode, Country, vote) %>%
+  mutate(vote=replace(vote, vote==2, 0)) %>%
+  mutate(vote=replace(vote, vote==3, -1)) %>%
+  mutate(vote=replace(vote, vote==8, 0))
+
+UN_Imp_Votes <- UN_Imp_Votes_Org %>%
+  pivot_wider(names_from=resid, values_from=vote)
+```
+
+```{r models}
+UN_Imp_Votes[1:6, 1:6]
+UN_Imp_Votes_1 <- UN_Imp_Votes %>%
+  na.omit() %>%
+  select(-ccode)
+
+UN_Numeric <- UN_Imp_Votes_1 %>%
+  select_if(is.numeric)
+
+UN_pca <- prcomp(UN_Numeric)
+
+UN_pcs <- UN_pca %>%
+  .$x %>%
+  as_tibble()
+
+UN_pcs <- bind_cols(
+  select(UN_Imp_Votes_1, Country),
+  UN_pcs
+)
+
+summary(UN_pca)
+```
+
+```{r estimation}
+fviz_nbclust(UN_Numeric, FUN = kmeans, method = "wss")
+fviz_nbclust(UN_Numeric, FUN = kmeans, method = "silhouette")
+fviz_nbclust(UN_Numeric, FUN = kmeans, method = "gap_stat")
+
+UN_kmeans3 <- kmeans(UN_Numeric, centers = 3, 
+                     nstart = 100)
+
+UN_clusters <- bind_cols(
+  select(UN_Imp_Votes_1, Country),
+select(UN_pcs, PC1, PC2),
+cluster3 = UN_kmeans3$cluster)
+
+mpowers <- c("USA", "GBR", "FRA", "CHN", "RUS")
+
+ggplot() +
+  geom_point(data = UN_clusters, 
+             aes(PC1, PC2, 
+                 color = factor(cluster3)),
+             alpha = 0.5) +
+  geom_text(data = filter(UN_pcs, Country %in% mpowers),
+            aes(PC1, PC2, label = Country)) +
+  scale_color_manual(values = c("blue", "red", "yellow")) +
+  labs(title = "K-Means with K=3 and PCA",
+       x = "PC1 (0.35 of Variation)",
+       y = "PC2 (0.26 of Variation)") +
+  theme_minimal() +
+  guides(text = NULL)
+```
