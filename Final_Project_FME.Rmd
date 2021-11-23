@@ -1,8 +1,101 @@
 ---
-title: "Final Project - FME"
-author: "Erin Lemons"
+title: "Foreign Military Education (FME) Analysis"
+author: "Erin Lemons (eml129), Kenton Thibault (akt44), Bria Pullin (bnp21)"
 date: "11/22/2021"
 output: html_document
 urlcolor: blue
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r include = FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+```
+
+\begin{center}
+\Huge{PPOL 670 | Data Assignment}
+
+\Huge{Foreign Military Education Networks and Influence in Africa Today}
+\end{center}
+
+\vspace{0.1in}
+
+```{r library}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(haven)
+library(ggthemes)
+library(tidyverse)
+library(httr)
+```
+
+# Introduction
+During his state visit to Russia, President of Angola Joao Lourenco signed
+several bilateral agreements to include cooperation on diamond mining and 
+processing.  Russian Predident Vladimir Putin welcomed his Angolan counterpart, "I am happy to welcome you to Moscow in your capacity as the head of state. You are well acquainted with our country, because you studied here, and I hope 
+you will find it both interesting and pleasant to see how Moscow and Russia 
+have changed" (The Kremlin 2019). Indeed, President Lourenco attended the 
+Vladimir Ilyich Lenin Military-Political Academy in 1978 (Cascais 2017). Certainly, President Lourenco is not the only African leader who has received military training abroad. Pictured below, Eritrean President Isaias poses with his fellow military students in 1967 China (Bodetti 2020).
+```{r photo}
+knitr::include_graphics("Eritrean_President_China.jpg")
+```
+
+
+Foreign military education and training occurs when a sponsoring state, state A, provides military education or training to military service members from a recipient state, state B.  Foreign military education is one tool that states use to influence other states' military elites, and by extension, other states’ foreign policy alignment (Barkawi 2011). In an era, to which many scholars and policymakers refer to as the return of great power competition (e.g., Kroenig
+2020; Hoffman 2021), **what do the foreign military education networks of today’s African heads of state and military leadership tell us about great power influence on the continent?**
+
+# Foreign Military Education (FME) Data
+Using official government and newspaper sources, we compiled a list of 106 current African heads of state (Presidents, Prime Ministers, and Kings) and military elites (Minister of Defense, Chief of the Armed Forces, or Chief of a Military Service) who received military training during their careers.  Out of these 106 leaders, 90 participated in foreign military education courses sponsored by 47 different countries.  The US provided the FME to the most African leaders followed by France, Great Britain, Russia, and China.  Nigeria is the most influential African FME sponsor having trained 11 African leaders outside of Nigeria.
+
+```{r descriptive information}
+FME <- read_csv("FME.csv") %>%
+  filter(Military_Experience == "1")
+
+FME_Sponsor_Sum <- FME %>%
+  select(FME_USA:FME_Singapore) %>%
+  summarise(across(FME_USA:FME_Singapore, sum))
+
+FME_Sponsor_Short <- FME_Sponsor_Sum %>%
+  sort(decreasing = TRUE) %>%
+  select(FME_USA, FME_France, FME_UK, FME_USSR_Russia, FME_China, FME_Nigeria) %>%
+  pivot_longer(FME_USA:FME_Nigeria, names_to = "sponsor", values_to = "total")
+
+
+FME_Sponsor_Short %>%
+  ggplot() +
+  geom_bar(aes(x= total, y = reorder(sponsor, total), fill = sponsor), stat="identity", width = 0.5, show.legend = FALSE) +
+  scale_y_discrete(labels = c("FME_USA" = "USA", "FME_France" = "France",
+                              "FME_UK" = "UK", "FME_USSR_Russia" = "USSR/Russia",
+                              "FME_Nigeria" = "Nigeria")) +
+  scale_fill_manual(values=c("grey", "grey", "grey", "grey", "blue", "grey")) +
+  labs(
+    title="The US Provides FME to the Most African Leaders",
+        x ="Number of African Leaders Trained", 
+    y = "Sponsoring Country") +
+  theme_minimal()
+
+
+```
+
+# Bibliography
+
+Barkawi, Tarak. “‘Defense Diplomacy’ in North-South Relations.”  *International Journal* 66, no. 3 (2011): 597-612. 
+
+Bodetti, Austin. "Through Eritrea, China Quietly Makes Inroads Near the Red Sea." *Eritrea Hub.* (28 January 2020). Available at: https://eritreahub.org/china-courts-eritrea-to-gain-a-grip-on-the-red-sea
+
+Cascais, Antonio. "Who is Angola's new president Joao Lourenco?" *Deutsche Welle* (26 September 2017). Available at: https://www.dw.com/en/who-is-angolas-new-president-joao-lourenco/a-40218458
+
+Hoffman, Jonathan. “The Return of Great Power Competition to the Middle East: A Two-Level Game.” *Middle East Policy* 28, no. 1 (2021): 87-104.
+
+The Kremlin, "Russian-Angolan Talks." 4 April 2019. Available at: http://en.kremlin.ru/events/president/news/60223 
+
+Kroenig, Matthew. *The Return of Great Power Rivalry: Democracy versus Autocracy from the Ancient World to the U.S. and China*.  New York, NY: Oxford University Press, 2020.
