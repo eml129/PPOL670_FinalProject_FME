@@ -1,0 +1,79 @@
+---
+title: "Data_Assignment_akt44"
+author: "Kenton Thibaut"
+date: "9/27/2021"
+output: pdf_document
+---
+
+# Part 1
+
+## Questions: 
+
+* What types of laws are challenged most frequently in China’s legislature? 
+
+
+* What factors influence whether or not a country will adopt China’s surveillance technologies? 
+
+# Part 2
+
+## Identify at least three data sets related to the question(s) from part 1.
+
+
+**Data set 1:** Developed by Rory Truex, the data comes from the China Policy Attitudes Survey (CPAS), an online survey conducted in October 2012 in partnership with a local marketing firm.. The CPAS uses a series of questions and embedded experiments to elicit opinions on politics and policy in China. Toward the end of the survey, respondents were randomly assigned to the public participation treatment and control groups. Respondents in the treatment condition viewed a series of four images of the NPC’s new public participation platform. Respondents in the control condition viewed no images. This treatment was designed to simulate authentic exposure to the new participation channel, and to provide information about new government efforts to increase citizen voice… After being exposed to their treatment condition, respondents proceeded to a short series of questions designed to assess attitudes toward the regime. Assesses the effect of the public participation treatment across four measures of regime satisfaction, as well as two crude measures of compliance. To strengthen the design, the analysis will also consider one placebo outcome—satisfaction with local government officials. In total, 10,000 survey solicitation links were sent out, yielding a sample of 2,270 responses.” 
+
+* **How the data are created:** survey experiment. 
+
+* **If there is a clear data dictionary:** Yes.  
+
+* **The unit of analysis of the data:** demographic categories.  
+
+* **The dimensions of the data:** Measures of Regime satisfaction (including towards POLICIES, feeling citizens have a VOICE, satisfaction with the National People’s Congress SATNPC as well as the central government. Measures of Compliance (including with TAXES and with MILITARYdictats)
+
+* **Any missingness in the data:** The CPAS sample is by no means representative of the Chinese population—only 39.9% of citizens (538 million) had Internet access as of June 2012—but it can be considered loosely representative of the online population. These citizens tend to be younger, wealthier, better educated, and more likely to live in urban areas.
+
+* **The limitations of the data:** should always be cautious when inferring from the experimental population to the full online population; also must be aware of any potential pre-treatment (previous exposure to the web portal).
+
+
+
+
+
+
+**Data set 2:** Developed by Sheena Greitens, the dataset is “constructed from corporate, media, and government reports in English, Chinese, Spanish, French, Arabic, and Russian, that codes the adoption of Chinese surveillance and policing platforms worldwide from 2008 to 2019. Sometimes referred to as “Safe City” solutions – the term used by these platforms’ largest global supplier, Huawei – these platforms are generally characterized by a big-data integration and predictive analytics platform that supports one or more high-tech command and-control centers, and analyzes, in close to real time, information inputs from a wide range of sources (criminal records, other government databases, networked surveillance cameras, facial and license plate recognition applications, etc).”
+
+* **How the data are created:** dataset constructed from corporate, government, and news reporting on adoption of Chinese telecom firm Huawei’s surveillance and policing platforms. Web scraping a key method for gathering the data. Have requested access to the dataset from the author. 
+
+* **If there is a clear data dictionary:** Yes.  
+
+* **The unit of analysis of the data:** Countries
+
+* **The dimensions of the data:** China surveillance technology, China partnership (binary), China partnership (ordinal), BRI membership, Polity Score, Political Stability, Homicide number (Logged), GDPPC (Logged), Military Spending (Logged), Government Effectiveness 
+
+* **Any missingness in the data:** Missing data is a significant problem on several independent variables (approaching 50% in some cases), and missingness is likely non-random. Moreover, there is heterogeneity in the      dependent variable observations that are coded as zeroes: some of these observations are true non-adopters, while other are missing adopters; publicly available sources do not (yet) allow us to distinguish between the two with confidence.
+
+* **The limitations of the data:** as it currently stands would be best for a preliminary analysis on initial   associations in the data, due to the missingness issue. 
+
+
+
+
+
+
+**Dataset 3:** Freedom House “Freedom in the World” report. “The Freedom in the World report is composed of numerical ratings and supporting descriptive texts for 195 countries and 15 territories. External analysts assess 210 countries and territories.” Freedom in the World uses a two-tiered system consisting of scores and status to qualify and rank countries on a freedom scale. 
+
+
+* **How the data are created:** using a combination of on-the-ground research, consultations with local contacts, and information from news articles, nongovernmental organizations, governments, and a variety of other sources, gather information on the electoral process, political pluralism and participation, the functioning of the government, freedom of expression and of belief, associational and organizational rights, the rule of law, and personal autonomy and individual rights in the countries surveyed. 
+
+
+* **If there is a clear data dictionary:** Yes. 
+
+
+* **The unit of analysis of the data:** Countries
+
+
+* **The dimensions of the data:** A country or territory is awarded 0 to 4 points for each of 10 political rights indicators and 15 civil liberties indicators, which take the form of questions; a score of 0 represents the smallest degree of freedom and 4 the greatest degree of freedom. The political rights questions are grouped into subcategories: Electoral Process (3 questions), Political Pluralism and Participation (4), and Functioning of Government (3). The civil liberties questions are grouped into four subcategories: Freedom of Expression and Belief (4 questions), Associational and Organizational Rights (3), Rule of Law (4), and Personal Autonomy and Individual Rights (4). Free, Partly Free, Not Free Status. The combination of the overall score awarded for political rights and the overall score awarded for civil liberties, after being equally weighted, determines the status of Free, Partly Free, or Not Free.
+
+
+* **Any missingness in the data:** Missingness in the data may be an issue for data relying on on the ground surveying techniques, especially in countries that are more authoritarian. 
+
+
+* **The limitations of the data:** Need to understand the issues in the dataset with regards to collection limitations and appropriately code/account for the potential endogeneity associated with missingness issues       described above.  
+
