@@ -1,10 +1,19 @@
 ---
 title: "UN Voting Cluster Analysis"
 author: "Erin Lemons (eml129), Kenton Thibault (akt44), Bria Pullin (bnp21)"
-date: "11/22/2021"
-output: html_document
-urlcolor: blue
+date: "12/07/2021"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+editor_options: 
+  chunk_output_type: console
 ---
+
+<style> body {text-align: justify} </style>
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
@@ -19,14 +28,6 @@ knitr::knit_hooks$set(chunk = function(x, options) {
 
 ```
 
-\begin{center}
-\Huge{Foreign Military Education Networks and Influence in Africa Today}
-
-\Huge{2017 UN Voting Cluster Analysis}
-\end{center}
-
-\vspace{0.1in}
-
 ```{r library}
 library(readr)
 library(tidyverse)
@@ -35,6 +36,7 @@ library(haven)
 options(scipen = 999)
 library(ggthemes)
 library(sf)
+library(geojsonio)
 library(patchwork)
 library(lubridate)
 library(tidycensus)
@@ -49,8 +51,12 @@ library(themis)
 library(vip)
 library(ranger)
 library(factoextra)
+library(rjson)
+library(mapproj)
+library(crsuggest)
 ```
 
+## Read Data
 ```{r formatting data and visualizing}
 UNvoting <- read_csv("UNVotes.csv")
 
@@ -69,6 +75,7 @@ UN_Imp_Votes <- UN_Imp_Votes_Org %>%
   pivot_wider(names_from=resid, values_from=vote)
 ```
 
+## PCA
 ```{r models}
 UN_Imp_Votes[1:6, 1:6]
 UN_Imp_Votes_1 <- UN_Imp_Votes %>%
@@ -91,7 +98,7 @@ UN_pcs <- bind_cols(
 
 summary(UN_pca)
 ```
-
+## Cluster Analysis
 ```{r estimation}
 fviz_nbclust(UN_Numeric, FUN = kmeans, method = "wss")
 fviz_nbclust(UN_Numeric, FUN = kmeans, method = "silhouette")
@@ -120,4 +127,46 @@ ggplot() +
        y = "PC2 (0.26 of Variation)") +
   theme_minimal() +
   guides(text = NULL)
+```
+
+## Map of Clusters
+
+```{r map}
+
+africa_map <- st_read("africa_adm0.geojson")
+
+UN_clusters_africa <- UN_clusters %>%
+  filter(Country!= "USA") %>%
+  filter(Country!= "RUS") %>%
+  filter(Country!= "FRA") %>%
+  filter(Country!= "CHN") %>%
+  filter(Country!= "GBR")
+
+dim(africa_map)
+dim(UN_clusters_africa)
+
+africa_clusters_map <- left_join(africa_map, 
+                                 UN_clusters_africa, 
+                                 by=c("adm0_a3" = "Country"))
+dim(africa_clusters_map)
+
+suggest_top_crs(africa_clusters_map)
+
+africa_clusters_map %>%
+  st_transform(crs=5523) %>%
+  ggplot() +
+  geom_sf(aes(fill = factor(cluster3)))  + 
+  scale_fill_manual(values = c("blue", "red", "yellow"),
+                    name = "UN Voting Alignment",
+                    labels = c("with US, France, Britain", 
+                               "with China and Russia", 
+                               "Unaligned",
+                               "No Information")) +
+  geom_sf_text(data = filter(africa_clusters_map, cluster3 == 1),aes(label=name), size=2, fontface="bold") +
+  geom_sf_text(data = filter(africa_clusters_map, cluster3 == 2),aes(label=name), size=2, fontface="bold", color="black") +
+  labs(title = "Most African Countries Vote Unaligned",
+       subtitle = "On 2018 UN General Assembly Votes Deemed Important by US",
+       caption = "Data: Erik Voeten's UN Voting Dataset") +
+  theme_void()
+  
 ```
