@@ -1,41 +1,50 @@
 ---
-title: "Foreign Military Education (FME) Analysis"
+title: "Foreign Military Education (FME) Descriptive Data"
 author: "Erin Lemons (eml129), Kenton Thibault (akt44), Bria Pullin (bnp21)"
-date: "11/22/2021"
-output: html_document
-urlcolor: blue
+date: "12/08/2021"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+editor_options: 
+  chunk_output_type: console
 ---
 
+<style> body {text-align: justify} </style>
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 ```
 
-```{r include = FALSE}
-def.chunk.hook  <- knitr::knit_hooks$get("chunk")
-knitr::knit_hooks$set(chunk = function(x, options) {
-  x <- def.chunk.hook(x, options)
-  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
-})
-
-```
-
-\begin{center}
-\Huge{PPOL 670 | Data Assignment}
-
-\Huge{Foreign Military Education Networks and Influence in Africa Today}
-\end{center}
-
-\vspace{0.1in}
 
 ```{r library}
 library(readr)
 library(tidyverse)
 library(stringr)
 library(haven)
+options(scipen = 999)
 library(ggthemes)
+library(sf)
+library(geojsonio)
+library(patchwork)
+library(lubridate)
+library(tidycensus)
 library(tidyverse)
 library(httr)
+library(jsonlite)
+library(tidymodels)
+library(rpart)
+library(rpart.plot)
+library(janitor)
+library(themis)
+library(vip)
+library(ranger)
+library(factoextra)
+library(rjson)
+library(mapproj)
+library(crsuggest)
 ```
 
 # Introduction
@@ -53,7 +62,7 @@ knitr::include_graphics("Eritrean_President_China.jpg")
 Foreign military education and training occurs when a sponsoring state, state A, provides military education or training to military service members from a recipient state, state B.  Foreign military education is one tool that states use to influence other states' military elites, and by extension, other states’ foreign policy alignment (Barkawi 2011). In an era, to which many scholars and policymakers refer to as the return of great power competition (e.g., Kroenig
 2020; Hoffman 2021), **what do the foreign military education networks of today’s African heads of state and military leadership tell us about great power influence on the continent?**
 
-# Foreign Military Education (FME) Data
+# FME Data
 Using official government and newspaper sources, we compiled a list of 106 current African heads of state (Presidents, Prime Ministers, and Kings) and military elites (Minister of Defense, Chief of the Armed Forces, or Chief of a Military Service) who received military training during their careers.  Out of these 106 leaders, 90 participated in foreign military education courses sponsored by 47 different countries.  The US provided the FME to the most African leaders followed by France, Great Britain, Russia, and China.  Nigeria is the most influential African FME sponsor having trained 11 African leaders outside of Nigeria.
 
 ```{r descriptive information}
@@ -84,6 +93,148 @@ FME_Sponsor_Short %>%
   theme_minimal()
 
 
+```
+
+# Maps of FME Relationships
+
+```{r map01}
+africa_map <- st_read("africa_adm0.geojson")
+edges <- read_csv("edgelist3.csv")
+
+top_sponsors = c("USA", "FRA", "UK", "RUS", "CHN", "NGA", "GBN")
+
+edges_map <- left_join(
+  africa_map, 
+  edges,
+  by=c("adm0_a3" ="B_ccode")) %>%
+  filter(A_ccode %in% top_sponsors)
+
+ggplot() +
+  geom_sf(data=africa_map)+
+  geom_sf(
+    data=edges_map, 
+    aes(fill=Connections), 
+    inherit.aes = FALSE) +
+  facet_wrap(~ factor(A_ccode, 
+                      levels=c("USA", 
+                               "FRA", 
+                               "GBN", 
+                               "CHN", 
+                               "RUS", 
+                               "NGA"))) +
+  scale_fill_continuous(
+      low="light blue",
+      high="dark blue")+
+    labs(title="Sponsors Focus on Different Countries",
+         subtitle = "But Allies Often Overlap",
+         fill="# 2021 Leaders Trained") +
+  theme_void()
+```
+
+```{r map02}
+africa_map <- st_read("africa_adm0.geojson")
+total_edges <- read_csv("edgelist5.csv") %>%
+  group_by(B_ccode) %>%
+  summarize(sum(Connections))
+
+
+total_edges_map <- left_join(
+  africa_map,                                    
+  total_edges, 
+  by=c("adm0_a3" ="B_ccode"))
+
+
+total_edges_map %>%
+  st_transform(crs=5523) %>%
+  ggplot() +
+  geom_sf(aes(fill = `sum(Connections)`)) + 
+  scale_fill_steps(
+  low = "light blue",
+  high = "dark blue",
+  na.value = "antiquewhite",
+  aesthetics = "fill") +
+  labs(title="Ghana, Nigeria, South Africa, and Namibia Participate the Most in FME Network", subtitle = "African Leaders in 2021", fill = "# of FME Relationships") +
+  theme_void()
+```
+
+
+```{r map03}
+edges_NATO <- edges %>%
+  filter(NATO == 1) %>%
+  group_by(B_ccode) %>%
+  summarize(sum(Connections)) 
+
+dim(africa_map)
+dim(edges_NATO)
+
+NATO_edges_map <- left_join(africa_map, 
+                                 edges_NATO, 
+                                 by=c("adm0_a3" = "B_ccode"))
+dim(NATO_edges_map)
+
+NATO_map <- NATO_edges_map %>%
+  st_transform(crs=5523) %>%
+  ggplot() +
+  geom_sf(aes(fill = NATO_edges_map$`sum(Connections)`), show.legend = FALSE) + 
+  scale_fill_steps(
+  n.breaks = 10,
+  low = "light blue",
+  high = "dark blue",
+  na.value = "antiquewhite",
+  aesthetics = "fill") +
+  labs(title="NATO-Sponsored FME", subtitle = "2021 African Leaders", fill = "Number of Leaders Trained") +
+  theme(title = element_text(size=1)) +
+  theme_void()
+
+edges_Warsaw <- edges %>%
+  filter(Warsaw == 1) %>%
+  group_by(B_ccode) %>%
+  summarize(sum(Connections)) 
+
+Warsaw_edges_map <- left_join(
+  africa_map, 
+  edges_Warsaw, 
+  by=c("adm0_a3" = "B_ccode"))
+
+Warsaw_map <- Warsaw_edges_map %>%
+  st_transform(crs=5523) %>%
+  ggplot() +
+  geom_sf(aes(fill = Warsaw_edges_map$`sum(Connections)`), show.legend = FALSE) +
+  scale_fill_steps(
+  low = "red",
+  high = "dark red",
+  na.value = "antiquewhite",
+  aesthetics = "fill") +
+  labs(title="Warsaw Pact/Russia Sponsored FME", subtitle = "2021 African Leaders", fill = "# of Leaders Trained") +
+  theme(plot.title = element_text(size=1)) +
+  theme_void()
+
+NATO_map + Warsaw_map
+```
+
+
+```{r map04}
+USA_China_edges <- read_csv("edgelist4.csv")
+
+USA_China_edges_map <- left_join(
+  africa_map, 
+  USA_China_edges, 
+  by=c("adm0_a3" = "B_ccode"))
+
+
+USA_China_edges_map  %>%
+  st_transform(crs=5523) %>%
+  ggplot() +
+  geom_sf(aes(fill = factor(Country_A))) + 
+  scale_fill_discrete(
+    na.value = "antiquewhite", 
+    name = "Leaders Trained by",
+    labels = c("China", 
+               "Both",
+               "USA",
+               "Neither/No Information")) +
+  labs(title="USA and China Contest Influence in Several African Countries", subtitle = "2021 African HOS, Chiefs of Armed Forces & Service Branches") +
+  theme_void()
 ```
 
 # Bibliography
