@@ -1,0 +1,359 @@
+---
+title: "Military Education Exchange - Network Analysis"
+author: 
+date: 
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+editor_options: 
+  chunk_output_type: console
+---
+
+<style> body {text-align: justify} </style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.pos = "!H", out.extra = "",  echo = TRUE, message = F, warning = F)
+library(knitr)
+library(igraph)
+library(visNetwork)
+library(dils)
+library(rgexf)
+
+```
+
+## Read Data
+```{r}
+#read in 
+getwd()
+setwd("/Users/aubreythibaut/Desktop")
+edgelist <- read.csv("edgelist.csv")
+h <- as.matrix(edgelist[,1:2])
+i <- graph_from_edgelist(h)
+plot(i)
+E(i)$weight<-edgelist[,3]
+
+```
+
+The edge list shows the connections between different countries. To compile the edge list, we counted the total number of FME relationships between two countries (either sponsor-recipient or recipient-sponsor). In other words, if 3x individuals from Tanzania were trained in South Africa and 1x individual from South Africa was trained in Tanzania, this was counted as a weighted edge of 4 for the South Africa-Tanzania pair.
+
+In the graph, we can see the set of edges, and the number of nodes and edges. Here, nodes correspond to countries and edges correspond to military education exchange between countries (i.e., whether a leader from a particular country has engaged military education exchange with another country). 
+
+## Network Statistics
+
+- The *density* of a network is the ratio of the number of edges to the the number of possible edges. In other words, the proportion of present edges to all possible edges in the network. A dense network indicates a high number of ties between many of the nodes. A less dense network means that there are fewer shared ties among all the nodes. 
+
+- *Transitivity* is a measure of the tendency of the nodes to cluster together. High transitivity means that the network contains communities or groups of nodes that are densely connected internally.
+
+- *Network diameter* is the longest geodesic distance (length of the shortest path between two nodes) in the network. In igraph, diameter() returns the distance, while get_diameter() returns the nodes along the first found path of that distance. Note that edge weights are used by default, unless set to NA.
+
+- *Average path length* is the mean of the shortest distance between each pair of nodes in the network (in both directions for directed graphs).
+
+```{r}
+#Total nodes: 69
+vcount(i)
+
+#Total edges: 160
+ecount(i)
+
+#Density of graph: 0.068
+graph.density(i,loops = F)
+
+#Transitivity: 0.217
+transitivity(i,type = "global")
+
+#Diameter: 8
+diameter(i)
+diameter(i, weights = NA) #7 unweighted
+diam <- get_diameter(i)
+diam 
+
+vcol <- rep("gray40", vcount(i))
+vcol[diam] <- "gold"
+ecol <- rep("gray80", ecount(i))
+ecol[E(i, path=diam)] <- "orange"
+plot(i,layout=layout.sphere, vertex.color=vcol, edge.color=ecol, edge.arrow.mode=0, vertex.label=NA, mfrow=c(1,1), main = "Military Education Network: Diameter\n(Longest Paths in Yellow)")
+
+
+#degree distribution
+deg_dist <- degree_distribution(i, cumulative=T, mode="all")
+plot(x=0:max(degree(i)), y=1-deg_dist, pch=19, cex=1.2, col="orange",
+xlab="Degree", ylab="Cumulative Frequency", main = "Military Education Network: Degree Distribution")
+
+#mean distance
+mean_distance(i) #3.04
+distances(i) # with edge weights
+distances(i, weights=NA) # ignore weights
+
+#cliques
+vcol <- rep("grey80", vcount(i))
+vcol[unlist(largest_cliques(i))] <- "gold"
+plot(as.undirected(i), vertex.label=NA, vertex.color=vcol, main = "Military Education Network: Cliques")
+
+##
+```
+
+- According to the above network statistics, we know that the network contains 69 nodes (countries) & 160 edges (leader has engaged in military education exchange with country i).
+
+- The density of the military education network is 0.068 (or about 7 percent), which is quite low. This indicates that the network is made up of only a few nodes that are connecting to most of the network, with a larger number of nodes that are poorly connected. This low density is a result of the fact that many of the countries in the dataset have no connections in terms of military education exchange. 
+
+- The transitivity of the network is 0.22. Perfect transitivity implies that, if $x$ is connected (through an edge) to $y$, and $y$ is connected to $z$, then $x$ is connected to $z$ as well. However, partial transitivity is useful. In many networks, particularly social ones, the fact that $x$ knows $y$ and $y$ knows $z$ does not guarantee that $x$ knows $z$ as well, but makes it much more likely. In this graph, the transitivity score indicates that 22% of the nodes are transitively connected to each other. 
+
+- The diameter of the network is 8, which means the maximum shortest path in the network has 14 nodes in it. In other words, the maximum distance between any pair of nodes is 8. To find the diameter of the graph, we first find the shortest path between each pair of vertices. The greatest length of any of these paths is the diameter of the graph.
+
+- The plot of the degree distribution of the network has the Y-axis representing the Frequency and the X-axis representing the Degree. In the study of graphs and networks, the degree of a node in a network is the number of connections it has to other nodes and the degree distribution is the probability distribution of these degrees over the whole network. 
+
+- In network analysis, a clique is a sub-set of a network in which the actors are more closely and intensely tied to one another than they are to other members of the network.The plot here shows the largest cliques in the military education exchange network in yellow, which shows the clique with the the most concentrated degree distribution & density. 
+
+## Network Visualization
+```{r}
+wk <- walktrap.community(i)
+df <- as.data.frame(table(wk$membership))
+names(df) <- c("Community Number", "Size")
+kable(df,caption = "Communities in the Network")
+
+table(wk$names, wk$membership)
+class(wk)
+
+memb <- membership(wk)
+class(memb)
+attributes(memb)
+wk$membership
+
+GroupNum<-wk$membership
+Names<-attr(membership(wk), "names")
+Memb.df<-cbind(GroupNum, Names)
+Memb.df<-cbind(GroupNum, Names)
+Memb.df<-as.data.frame(Memb.df)
+library(dplyr)
+Memb.df%>%arrange(GroupNum)
+
+
+nodes <- data.frame(id = V(i)$name, title = V(i)$name, group = wk$membership)
+edges <- get.data.frame(i, what="edges")[1:2]
+
+vis.nodes <- nodes
+vis.links <- edges
+vis.nodes$shape  <- "dot"  
+vis.nodes$shadow <- TRUE 
+vis.nodes$title  <- V(i)$name 
+vis.nodes$label  <- V(i)$name 
+vis.nodes$size   <- 35 
+vis.nodes$borderWidth <- 2 
+
+vis.links$width <- 3 
+vis.links$font.size <- 15
+vis.links$label <- E(i)$weight
+vis.links$dashes <- as.vector(ifelse(E(i)$weight==1,TRUE,FALSE))
+vis.links$color <- palette()[E(i)$weight]
+vis.links$arrows <- "to" # arrows: 'from', 'to', or 'middle'
+vis.links$smooth <- FALSE    
+vis.links$shadow <- FALSE   
+vis.nodes$color.border <- "black"
+vis.nodes$color.highlight.background <- "orange"
+vis.nodes$color.highlight.border <- "darkred"
+
+ k <- visNetwork(vis.nodes, vis.links, width = "100%", height = 700) %>%
+visIgraphLayout(layout = "layout.sphere")
+ 
+ledges <- data.frame(color = palette()[unique(E(i)$weight)], label =unique(E(i)$weight))  
+visLegend(k, main="Communities",addEdges = ledges, position="left", ncol=3)
+
+wolf <- plot(wk,i, vertex.label.cex =0.25, main = "Military Education Exchange Network", labels = TRUE)
+
+
+```
+
+The above network visualization shows the different communities in the military education exchange network. Qualitatively, a community is defined as a subset of nodes within the graph such that connections between the nodes are denser than connections with the rest of the network. We can see from the visualization & table that 3 or 4 communities have a large number of nodes, while the rest of the communities have only 1 or 2 nodes. The largest community in the network is presented in light red & the second largest is presented in light blue. From the visualization, it seems that most of the countries in the network tend to exchange military education with countries within their "circle." Looking into the larger  communities, we can see that the nodes within them have many connections within the community and very few connections outside the community. The top two countries, the USA and China, are in the same community. The "zoomed out" visualization of the communities in the network shows more clearly that nodes tend to form ties within their own communities; i.e., countries engaged in military education exchanges with countries within its circle.
+
+## Centrality
+
+In graph theory and network analysis, methods of centrality assign numbers or rankings to nodes within a graph corresponding to their network position. Applications include identifying the most influential person(s) in a social network, key infrastructure nodes in the Internet or urban networks, super-spreaders of disease, and brain networks, for example. Centrality measures are explored below as a way to identify the most influential countries in our network.
+
+```{r centrality}
+#Centrality table
+Degree <- degree(i,mode = "all")
+Betweenness <- betweenness(i)
+Closeness <- closeness(i)
+df <- data.frame(Degree, Betweenness, Closeness)
+kable(df,caption = "Centrality Score for each Network")
+```
+
+Centrality measures are computed for each node, presented in the table. Here, we compute `Degree`, `Betweenness` and `Closenness` centrality (explained further below). Each centrality measure is depicted in a network plot, where the size of the node represents its centrality score. The top 5 most important countries with regards to centrality measures are depicted below.
+
+### Degree Centrality
+
+The degree centrality of a node is simply its degree—the number of edges it has. The higher the degree, the more central the node is. This can be an effective measure, since many nodes with high degrees also have high centrality by other measures.
+
+In our network, the top five nodes by degree centrality are the USA, France, South Africa, Namibia, and Nigeria.
+
+In the visualization below, we can see that the USA and France are the top two nodes in terms of degree centrality.
+
+
+```{r}
+#Top 5 nodes by Degree centrality
+sort(degree(i,mode = "all"),decreasing = TRUE)[1:5]
+
+
+## Network Visualization By Degree
+nodes <- data.frame(id = V(i)$name, title = V(i)$name, group = wk$membership)
+edges <- get.data.frame(i, what="edges")[1:2]
+
+vis.nodes <- nodes
+vis.links <- edges
+vis.nodes$shape  <- "dot"  
+vis.nodes$shadow <- TRUE 
+vis.nodes$title  <- V(i)$name 
+vis.nodes$label  <- V(i)$name 
+vis.nodes$size   <- Degree * 3 
+vis.nodes$borderWidth <- 2 
+
+vis.links$width <- 3 
+vis.links$font.size <- 15
+vis.links$label <- E(i)$weight
+vis.links$dashes <- as.vector(ifelse(E(i)$weight==1,TRUE,FALSE))
+vis.links$color <- palette()[E(i)$weight]
+vis.links$arrows <- "to" 
+vis.links$smooth <- FALSE    
+vis.links$shadow <- FALSE   
+vis.nodes$color.border <- "black"
+vis.nodes$color.highlight.background <- "orange"
+vis.nodes$color.highlight.border <- "darkred"
+
+ k <- visNetwork(vis.nodes, vis.links, width = "100%", height = 700, main = "Network Visualization by Degree centrality") %>%
+visIgraphLayout(layout = "layout.sphere")
+ 
+ledges <- data.frame(color = palette()[unique(E(i)$weight)], label =unique(E(i)$weight))  
+visLegend(k, main="Communities",addEdges = ledges, position="left", ncol=3)
+
+```
+
+
+### Betweenness Centrality
+Betweenness centrality quantifies the number of times a node acts as a bridge along the shortest path between two other nodes, that is, betweenness centrality ranks the importance of a node in terms of its role as a "bridge"connecting other nodes.
+
+The top five nodes by betweenness centrality in this network are the USA, South Africa, France, Ghana, and Nigeria.
+
+In the visualization below, we can see that the USA and South Africa are the top ranked in terms of betweenness centrality. In other words, countries tend to engage in military education exchange with countries that are connected (i.e, have engaged in education exchange) with these two countries.
+
+
+```{r}
+#Top 5 nodes by Betweenness Centrality
+sort(betweenness(i,directed = FALSE),decreasing = TRUE)[1:5]
+
+## Network Visualization By Betweenness
+nodes <- data.frame(id = V(i)$name, title = V(i)$name, group = wk$membership)
+edges <- get.data.frame(i, what="edges")[1:2]
+
+vis.nodes <- nodes
+vis.links <- edges
+vis.nodes$shape  <- "dot"  
+vis.nodes$shadow <- TRUE #Drop node shadow
+vis.nodes$title  <- V(i)$name # Text on click
+vis.nodes$label  <- V(i)$name # Node label
+vis.nodes$size   <- Betweenness * 0.8 # Node size
+vis.nodes$borderWidth <- 2 # Node border width
+
+vis.links$width <- 3 # line width
+vis.links$font.size <- 15
+vis.links$label <- E(i)$weight
+vis.links$dashes <- as.vector(ifelse(E(i)$weight==1,TRUE,FALSE))
+vis.links$color <- palette()[E(i)$weight]
+vis.links$arrows <- "to" # arrows: 'from', 'to', or 'middle'
+vis.links$smooth <- FALSE    #edges curved? Y/N
+vis.links$shadow <- FALSE    # edge shadow? Y/N
+vis.nodes$color.border <- "black"
+vis.nodes$color.highlight.background <- "orange"
+vis.nodes$color.highlight.border <- "darkred"
+
+ k <- visNetwork(vis.nodes, vis.links, width = "100%", height = 700, main = "Network Visualization by Betweenness centrality") %>%
+visIgraphLayout(layout = "layout.sphere")
+ 
+ledges <- data.frame(color = palette()[unique(E(i)$weight)], label =unique(E(i)$weight))  
+visLegend(k, main="Communities",addEdges = ledges, position="left", ncol=3)
+```
+
+
+### Closeness Centrality
+
+Closeness centrality indicates how close a node is to all other nodes in the network. It is calculated as the average of the shortest path length from the node to every other node in the network.
+
+In our network, the top five nodes by closeness centrality are the USA, South Africa, Nigeria, the UK, and Ghana, in that order. 
+
+The visualization below showsthat the USA and South Africa are the top two nodes in terms of closeness centrality.
+
+
+
+```{r}
+#Top 5 nodes by closeness centrality
+sort(closeness(i,mode = "all"),decreasing = TRUE)[1:5]
+
+
+## Network Visualization By Closeness
+nodes <- data.frame(id = V(i)$name, title = V(i)$name, group = wk$membership)
+edges <- get.data.frame(i, what="edges")[1:2]
+
+vis.nodes <- nodes
+vis.links <- edges
+vis.nodes$shape  <- "dot"  
+vis.nodes$shadow <- TRUE 
+vis.nodes$title  <- V(i)$name 
+vis.nodes$label  <- V(i)$name 
+vis.nodes$size   <- Closeness * 10000 
+vis.nodes$borderWidth <- 2 
+
+vis.links$width <- 3 
+vis.links$font.size <- 15
+vis.links$label <- E(i)$weight
+vis.links$dashes <- as.vector(ifelse(E(i)$weight==1,TRUE,FALSE))
+vis.links$color <- palette()[E(i)$weight]
+vis.links$arrows <- "to" 
+vis.links$smooth <- FALSE    
+vis.links$shadow <- FALSE
+vis.nodes$color.border <- "black"
+vis.nodes$color.highlight.background <- "orange"
+vis.nodes$color.highlight.border <- "darkred"
+
+ k <- visNetwork(vis.nodes, vis.links, width = "100%", height = 700, main = "Network Visualization by Closeness Centrality") %>%
+visIgraphLayout(layout = "layout.sphere")
+ 
+ledges <- data.frame(color = palette()[unique(E(i)$weight)], label =unique(E(i)$weight))  
+visLegend(k, main="Communities",addEdges = ledges, position="left", ncol=3)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
