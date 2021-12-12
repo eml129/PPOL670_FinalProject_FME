@@ -1,0 +1,31 @@
+---
+title: "Bibliography"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+editor_options: 
+  chunk_output_type: console
+---
+
+<style> body {text-align: justify} </style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+# Bibliography
+
+Barkawi, Tarak. “‘Defense Diplomacy’ in North-South Relations.”  *International Journal* 66, no. 3 (2011): 597-612. 
+
+Bodetti, Austin. "Through Eritrea, China Quietly Makes Inroads Near the Red Sea." *Eritrea Hub.* (28 January 2020). Available at: https://eritreahub.org/china-courts-eritrea-to-gain-a-grip-on-the-red-sea
+
+Cascais, Antonio. "Who is Angola's new president Joao Lourenco?" *Deutsche Welle* (26 September 2017). Available at: https://www.dw.com/en/who-is-angolas-new-president-joao-lourenco/a-40218458
+
+Hoffman, Jonathan. “The Return of Great Power Competition to the Middle East: A Two-Level Game.” *Middle East Policy* 28, no. 1 (2021): 87-104.
+
+The Kremlin, "Russian-Angolan Talks." 4 April 2019. Available at: http://en.kremlin.ru/events/president/news/60223 
+
+Kroenig, Matthew. *The Return of Great Power Rivalry: Democracy versus Autocracy from the Ancient World to the U.S. and China*.  New York, NY: Oxford University Press, 2020.
