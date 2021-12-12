@@ -1,7 +1,5 @@
 ---
 title: "Foreign Military Education (FME) Descriptive Data"
-author: "Erin Lemons (eml129), Kenton Thibault (akt44), Bria Pullin (bnp21)"
-date: "12/08/2021"
 output: 
   html_document:
     toc: true
@@ -47,20 +45,6 @@ library(mapproj)
 library(crsuggest)
 ```
 
-# Introduction
-During his state visit to Russia, President of Angola Joao Lourenco signed
-several bilateral agreements to include cooperation on diamond mining and 
-processing.  Russian Predident Vladimir Putin welcomed his Angolan counterpart, "I am happy to welcome you to Moscow in your capacity as the head of state. You are well acquainted with our country, because you studied here, and I hope 
-you will find it both interesting and pleasant to see how Moscow and Russia 
-have changed" (The Kremlin 2019). Indeed, President Lourenco attended the 
-Vladimir Ilyich Lenin Military-Political Academy in 1978 (Cascais 2017). Certainly, President Lourenco is not the only African leader who has received military training abroad. Pictured below, Eritrean President Isaias poses with his fellow military students in 1967 China (Bodetti 2020).
-```{r photo}
-knitr::include_graphics("Eritrean_President_China.jpg")
-```
-
-
-Foreign military education and training occurs when a sponsoring state, state A, provides military education or training to military service members from a recipient state, state B.  Foreign military education is one tool that states use to influence other states' military elites, and by extension, other states’ foreign policy alignment (Barkawi 2011). In an era, to which many scholars and policymakers refer to as the return of great power competition (e.g., Kroenig
-2020; Hoffman 2021), **what do the foreign military education networks of today’s African heads of state and military leadership tell us about great power influence on the continent?**
 
 # FME Data
 Using official government and newspaper sources, we compiled a list of 106 current African heads of state (Presidents, Prime Ministers, and Kings) and military elites (Minister of Defense, Chief of the Armed Forces, or Chief of a Military Service) who received military training during their careers.  Out of these 106 leaders, 90 participated in foreign military education courses sponsored by 47 different countries.  The US provided the FME to the most African leaders followed by France, Great Britain, Russia, and China.  Nigeria is the most influential African FME sponsor having trained 11 African leaders outside of Nigeria.
@@ -97,6 +81,8 @@ FME_Sponsor_Short %>%
 
 # Maps of FME Relationships
 
+The maps below indicate that FME-sponsors focus on different countries but both allies (US-UK-France, Russia-China) and potential competitors (US-China, US-Russia) overlap on certain countries.  One could expect that this overlap among allies may complement each others influence in a particular African state whereas overlap between competitors likely counteracts or reduces each others influence. A key determinant in Nigeria's FME relationships appear to be its geographic proximity to its FME partner.
+
 ```{r map01}
 africa_map <- st_read("africa_adm0.geojson")
 edges <- read_csv("edgelist3.csv")
@@ -126,10 +112,11 @@ ggplot() +
       low="light blue",
       high="dark blue")+
     labs(title="Sponsors Focus on Different Countries",
-         subtitle = "But Allies Often Overlap",
+         subtitle = "But Allies and Competitors Often Overlap",
          fill="# 2021 Leaders Trained") +
   theme_void()
 ```
+The number of 2021 African leaders trained by various FME-sponsors varies widely.  It appears that certain states like Ghana, Nigeria, South Africa, and Namibia are particularly connected within the FME network.  This means that both the leaders of these countries were trained by numerous FME sponsors and that their countries trained many other African countries' leaders. It is perhaps not surprising that these countries are all located in Sub-Saharan Africa. North Africa is potentially more integrated with the Middle East (although this would require further investigation).
 
 ```{r map02}
 africa_map <- st_read("africa_adm0.geojson")
@@ -157,6 +144,7 @@ total_edges_map %>%
   theme_void()
 ```
 
+The maps below show that NATO has sponsored FME for more African leaders in 2021 than the Warsaw Pact/Russia. Certainly, several African leaders today received training by Warsaw Pact member states during the Cold War and more recently Russia has increased its military training to the continent.  Nonetheless, it is not surprising that NATO, who continued training at high levels during the 1990s, is outperforming the Warsaw Pact/Russia.
 
 ```{r map03}
 edges_NATO <- edges %>%
@@ -182,7 +170,7 @@ NATO_map <- NATO_edges_map %>%
   high = "dark blue",
   na.value = "antiquewhite",
   aesthetics = "fill") +
-  labs(title="NATO-Sponsored FME", subtitle = "2021 African Leaders", fill = "Number of Leaders Trained") +
+  labs(title="NATO Sponsors Significantly More FME", subtitle = "2021 African Leaders", fill = "Number of Leaders Trained") +
   theme(title = element_text(size=1)) +
   theme_void()
 
@@ -205,7 +193,7 @@ Warsaw_map <- Warsaw_edges_map %>%
   high = "dark red",
   na.value = "antiquewhite",
   aesthetics = "fill") +
-  labs(title="Warsaw Pact/Russia Sponsored FME", subtitle = "2021 African Leaders", fill = "# of Leaders Trained") +
+  labs(title="Than the Warsaw Pact/Russia", fill = "# of Leaders Trained") +
   theme(plot.title = element_text(size=1)) +
   theme_void()
 
@@ -213,6 +201,7 @@ NATO_map + Warsaw_map
 ```
 
 
+The map below highlights the competition between the US and China with regards to military training in Africa.  As one can see based on the red and blue, the US has trained leaders of more African countries than China.  Nevertheless, one can see that both China and the US have trained leaders in Niger, Nigeria, Liberia, and Namibia. As Nigeria is a major FME-sponsor in its own right, the competition in this country will be particularly important for future FME community formation and influence.
 ```{r map04}
 USA_China_edges <- read_csv("edgelist4.csv")
 
@@ -236,17 +225,3 @@ USA_China_edges_map  %>%
   labs(title="USA and China Contest Influence in Several African Countries", subtitle = "2021 African HOS, Chiefs of Armed Forces & Service Branches") +
   theme_void()
 ```
-
-# Bibliography
-
-Barkawi, Tarak. “‘Defense Diplomacy’ in North-South Relations.”  *International Journal* 66, no. 3 (2011): 597-612. 
-
-Bodetti, Austin. "Through Eritrea, China Quietly Makes Inroads Near the Red Sea." *Eritrea Hub.* (28 January 2020). Available at: https://eritreahub.org/china-courts-eritrea-to-gain-a-grip-on-the-red-sea
-
-Cascais, Antonio. "Who is Angola's new president Joao Lourenco?" *Deutsche Welle* (26 September 2017). Available at: https://www.dw.com/en/who-is-angolas-new-president-joao-lourenco/a-40218458
-
-Hoffman, Jonathan. “The Return of Great Power Competition to the Middle East: A Two-Level Game.” *Middle East Policy* 28, no. 1 (2021): 87-104.
-
-The Kremlin, "Russian-Angolan Talks." 4 April 2019. Available at: http://en.kremlin.ru/events/president/news/60223 
-
-Kroenig, Matthew. *The Return of Great Power Rivalry: Democracy versus Autocracy from the Ancient World to the U.S. and China*.  New York, NY: Oxford University Press, 2020.

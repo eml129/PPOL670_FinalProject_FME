@@ -168,6 +168,70 @@ wolf <- plot(wk,i, vertex.label.cex =0.25, main = "Military Education Exchange N
 
 The above network visualization shows the different communities in the military education exchange network. Qualitatively, a community is defined as a subset of nodes within the graph such that connections between the nodes are denser than connections with the rest of the network. We can see from the visualization & table that 3 or 4 communities have a large number of nodes, while the rest of the communities have only 1 or 2 nodes. The largest community in the network is presented in light red & the second largest is presented in light blue. From the visualization, it seems that most of the countries in the network tend to exchange military education with countries within their "circle." Looking into the larger  communities, we can see that the nodes within them have many connections within the community and very few connections outside the community. The top two countries, the USA and China, are in the same community. The "zoomed out" visualization of the communities in the network shows more clearly that nodes tend to form ties within their own communities; i.e., countries engaged in military education exchanges with countries within its circle.
 
+```{r addition01}
+library(sf)
+world <- read_sf("countries.geojson") 
+membership <- read_csv("Membership.csv")
+
+membership_map <- left_join(world, 
+                            membership, 
+                            by=c("ADMIN" = "Names"))
+ 
+membership_map %>%
+  st_transform("+proj=moll") %>%
+  ggplot()+
+  geom_sf(aes(fill=factor(GroupNum)))+
+  scale_fill_manual(
+    na.value = "antiquewhite", 
+    values = c("red", "blue", "green", "yellow", "dark blue", "orange", "purple", "pink"),
+    name = "Communities",
+    labels = c("France", 
+               "UK and Russia",
+               "US and China",
+               "Spain",
+               "Singapore",
+               "Turkey",
+               "Jordan",
+               "Portugal and Cuba",
+               "No Information")) +
+  labs(title="US, Europe, and BRICS Tied Into African FME Network", subtitle = "African Leaders in 2021") +
+  theme_void()
+```
+
+The above map displays the network communities geographically.  The geographic display highlights the major powers in the Liberal International Order (the US and Western Europe) as well as the emerging powers, BRICS (Brazil, Russia, India, China, and South Africa), are all tied into the African FME network. France appears to have maintained connections with its former colonial empire in Africa.  Similarly, the UK does as well to some extent, although it appears to compete for influence with Russia.  Furthermore, several Commonwealth nations to include India and Canada are integrated into the community - perhaps due to their ties wtih the UK. Interestingly, the US, China, and Pakistan are within the same community. Perhaps this is indicative of the level of competition within these countries as the US and China also have several ties to the first two communities as well.  Finally, this map shows that smaller powers such as Spain, Singapore, Turkey, Portugal, and Cuba may actively seek out FME relationships with smaller African countries that the major powers are less interested in.
+
+```{r addition02}
+africa_map <- st_read("africa_adm0.geojson")
+
+membership_map_africa <- left_join(africa_map, 
+                            membership, 
+                            by=c("adm0_a3" = "Codes"))
+
+membership_map_africa %>%
+  st_transform(crs=5523) %>%
+  ggplot()+
+  geom_sf(aes(fill=factor(GroupNum)))+
+  scale_fill_manual(
+    na.value = "antiquewhite", 
+    values = c("red", "blue", "green", "yellow", "dark blue", "orange", "purple", "pink"),
+    name = "Communities",
+    labels = c("France", 
+               "UK and Russia",
+               "US and China",
+               "Spain",
+               "Singapore",
+               "Turkey",
+               "Jordan",
+               "Portugal and Cuba",
+               "No Information")) +
+  labs(title="Geographic Contiguity Important but Not All-Determining for Communties", subtitle = "African Leaders in 2021") +
+  theme_void()      
+```
+
+The above visualization of communities as restricted to the African continent allows us to see how important geographic contiguity appears to be.  Certainly, the French community is split in two.  Similarly, the UK/Russian community is split into Egypt and southern, coastal Africa.  Nonetheless, most African countries within a community border others within the same community. One would expect African states to interact more with their neighbors than states that are further away. This logic does not apply for the interactions of great powers, like the US or China, who are operating at a great distance with all African states.  Therefore, geographic contiguity highlights the importance of relationships between African countries to influence community formation and maintenance.
+
+
+
 ## Centrality
 
 In graph theory and network analysis, methods of centrality assign numbers or rankings to nodes within a graph corresponding to their network position. Applications include identifying the most influential person(s) in a social network, key infrastructure nodes in the Internet or urban networks, super-spreaders of disease, and brain networks, for example. Centrality measures are explored below as a way to identify the most influential countries in our network.
@@ -182,6 +246,7 @@ kable(df,caption = "Centrality Score for each Network")
 ```
 
 Centrality measures are computed for each node, presented in the table. Here, we compute `Degree`, `Betweenness` and `Closenness` centrality (explained further below). Each centrality measure is depicted in a network plot, where the size of the node represents its centrality score. The top 5 most important countries with regards to centrality measures are depicted below.
+
 
 ### Degree Centrality
 
