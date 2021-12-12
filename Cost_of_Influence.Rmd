@@ -1,0 +1,103 @@
+---
+title: "Cost of Influence"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+editor_options: 
+  chunk_output_type: console
+---
+
+<style> body {text-align: justify} </style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  gganimate = list(
+    nframes = 50
+  ),
+  out.width = '100%'
+)
+```
+
+
+```{r library}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(haven)
+options(scipen = 999)
+library(ggthemes)
+library(sf)
+library(geojsonio)
+library(patchwork)
+library(lubridate)
+library(tidycensus)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(tidymodels)
+library(rpart)
+library(rpart.plot)
+library(janitor)
+library(themis)
+library(vip)
+library(ranger)
+library(factoextra)
+library(rjson)
+library(mapproj)
+library(crsuggest)
+library(gganimate)
+library(av)
+library(transformr)
+```
+
+# Read Data 
+```{r read data}
+africa_map <- st_read("africa_adm0.geojson")
+US_trainees <- read_csv("US_Training_Numbers.csv")
+US_edges <- read_csv("US_edges.csv")
+
+US_trainees_africa <- left_join(africa_map,
+                                US_trainees,
+                                by=c("adm0_a3" ="Code")) 
+US_africa <- left_join(US_trainees_africa,
+                       US_edges,
+                       by=c("adm0_a3" = "B_ccode")) %>%
+  st_transform(crs=5523)
+```
+
+# Map of US FME Sponsorship
+```{r animated map}
+animated_map <- ggplot(US_africa) +
+  geom_sf(fill="antiquewhite") +
+  geom_point(
+    aes(color=factor(Connections), 
+        size = NumTrained, 
+        geometry = geometry, frame=year, cumulative=FALSE),
+    stat = "sf_coordinates", alpha=0.5)+
+  scale_size_continuous(range=c(1,15),
+                        breaks=c(0, 25, 50, 100, 200, 1000),
+                        name = "# Military Trained by US in Given Year")+
+  scale_color_manual(
+    na.value = "black",
+    values = c("light green", 
+               "green", 
+               "dark green"),
+    name = "# of 2021 Leaders Trained by US"
+  )+
+    theme_void()+
+  transition_time(year, range=c(2016, 2020)) +
+  labs(title= "Not All Military Trained by US Equally Likely to Become Leaders", subtitle = "Year: {frame_time}", caption="Training Numbers from DoD and DoS Annual Reports to Congress")
+
+animate(
+  animated_map + enter_fade() + exit_fade(), duration = 20,
+  renderer = av_renderer()
+)
+```
+
+# Map of US Military Aid
