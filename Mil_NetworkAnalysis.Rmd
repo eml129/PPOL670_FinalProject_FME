@@ -21,18 +21,19 @@ library(igraph)
 library(visNetwork)
 library(dils)
 library(rgexf)
-
+library(readr)
+library(tidyverse)
+library(ggplot2)
 ```
 
 ## Read Data
 ```{r}
-#read in 
-getwd()
-setwd("/Users/aubreythibaut/Desktop")
 edgelist <- read.csv("edgelist.csv")
 h <- as.matrix(edgelist[,1:2])
 i <- graph_from_edgelist(h)
-plot(i)
+
+par(mar=c(0,0,0,0))
+    plot(i, vertex.size=10, vertex.label.cex=0.5, edge.arrow.size=.25)
 E(i)$weight<-edgelist[,3]
 
 ```
@@ -84,8 +85,8 @@ xlab="Degree", ylab="Cumulative Frequency", main = "Military Education Network: 
 
 #mean distance
 mean_distance(i) #3.04
-distances(i) # with edge weights
-distances(i, weights=NA) # ignore weights
+#distances(i) # with edge weights
+#distances(i, weights=NA) # ignore weights
 
 #cliques
 vcol <- rep("grey80", vcount(i))
@@ -114,13 +115,13 @@ df <- as.data.frame(table(wk$membership))
 names(df) <- c("Community Number", "Size")
 kable(df,caption = "Communities in the Network")
 
-table(wk$names, wk$membership)
-class(wk)
+#table(wk$names, wk$membership)
+#class(wk)
 
-memb <- membership(wk)
-class(memb)
-attributes(memb)
-wk$membership
+#memb <- membership(wk)
+#class(memb)
+#attributes(memb)
+#wk$membership
 
 GroupNum<-wk$membership
 Names<-attr(membership(wk), "names")
@@ -166,7 +167,18 @@ wolf <- plot(wk,i, vertex.label.cex =0.25, main = "Military Education Exchange N
 
 ```
 
-The above network visualization shows the different communities in the military education exchange network. Qualitatively, a community is defined as a subset of nodes within the graph such that connections between the nodes are denser than connections with the rest of the network. We can see from the visualization & table that 3 or 4 communities have a large number of nodes, while the rest of the communities have only 1 or 2 nodes. The largest community in the network is presented in light red & the second largest is presented in light blue. From the visualization, it seems that most of the countries in the network tend to exchange military education with countries within their "circle." Looking into the larger  communities, we can see that the nodes within them have many connections within the community and very few connections outside the community. The top two countries, the USA and China, are in the same community. The "zoomed out" visualization of the communities in the network shows more clearly that nodes tend to form ties within their own communities; i.e., countries engaged in military education exchanges with countries within its circle.
+The above network visualization shows the different communities in the military education exchange network. Qualitatively, a community is defined as a subset of nodes within the graph such that connections between the nodes are denser than connections with the rest of the network. We can see from the visualization & table that communities 1,2,and 3 have a large number of nodes, while the rest of the communities have only 1 or 2 nodes. From the visualization, it seems that most of the countries in the network tend to exchange military education with countries within their "circle." 
+
+The two largest communities,2 and 3, are comprised of the following: 
+
+Community 2 is comprised of Egypt, Kenya, UK, Namibia, USSR_Russia, Angola, South Africa, Uganda, Zimbabwe, Tanzania, India,  Mozambique, Yugoslavia, Lebanon, Palestine, Canada, East Germany, Brazil, and Italy. The presence of both the UK and Russia within the same community is interesting and can possibly be explained in part by those countries’ histories of military or colonial involvement in the countries in this community. 
+
+Community 3 includes USA, Gambia, Ghana, Liberia, Israel, Niger, Nigeria, Algeria, Guinea-Bissau, China, Sierra Leone, Netherlands, Eritrea, Pakistan, Zambia, Libya, Chile, Madagascar, and Rwanda. What is interesting that the USA and China are in the same community, suggesting that other countries within this community tend to engage in military education exchange with both of them, even though they are adversaries.
+
+
+The second largest community, community 1, is made up of mostly African states, and include: Benin, Burkina Faso, Gabon, France, Guinea, Mali, Senegal, Seychelles, Cameroon, Chad, Comoros, Congo, Morocco, Belgium, Mauritania, Germany, Cote d'Ivoire, and Togo. The presence of France and Belgium within this community may suggest the influence of past colonial relationships at work, while the inclusion of Germany is more puzzling.
+
+## Geographic Network Visualization
 
 ```{r addition01}
 library(sf)
@@ -230,8 +242,6 @@ membership_map_africa %>%
 
 The above visualization of communities as restricted to the African continent allows us to see how important geographic contiguity appears to be.  Certainly, the French community is split in two.  Similarly, the UK/Russian community is split into Egypt and southern, coastal Africa.  Nonetheless, most African countries within a community border others within the same community. One would expect African states to interact more with their neighbors than states that are further away. This logic does not apply for the interactions of great powers, like the US or China, who are operating at a great distance with all African states.  Therefore, geographic contiguity highlights the importance of relationships between African countries to influence community formation and maintenance.
 
-
-
 ## Centrality
 
 In graph theory and network analysis, methods of centrality assign numbers or rankings to nodes within a graph corresponding to their network position. Applications include identifying the most influential person(s) in a social network, key infrastructure nodes in the Internet or urban networks, super-spreaders of disease, and brain networks, for example. Centrality measures are explored below as a way to identify the most influential countries in our network.
@@ -246,7 +256,6 @@ kable(df,caption = "Centrality Score for each Network")
 ```
 
 Centrality measures are computed for each node, presented in the table. Here, we compute `Degree`, `Betweenness` and `Closenness` centrality (explained further below). Each centrality measure is depicted in a network plot, where the size of the node represents its centrality score. The top 5 most important countries with regards to centrality measures are depicted below.
-
 
 ### Degree Centrality
 
@@ -299,9 +308,9 @@ visLegend(k, main="Communities",addEdges = ledges, position="left", ncol=3)
 ### Betweenness Centrality
 Betweenness centrality quantifies the number of times a node acts as a bridge along the shortest path between two other nodes, that is, betweenness centrality ranks the importance of a node in terms of its role as a "bridge"connecting other nodes.
 
-The top five nodes by betweenness centrality in this network are the USA, South Africa, France, Ghana, and Nigeria.
+The top five nodes by betweenness centrality in this network are the USA, France, Niger, South Africa and Namibia.
 
-In the visualization below, we can see that the USA and South Africa are the top ranked in terms of betweenness centrality. In other words, countries tend to engage in military education exchange with countries that are connected (i.e, have engaged in education exchange) with these two countries.
+In the visualization below, we can see that the USA and France are the top ranked in terms of betweenness centrality. In other words, countries tend to engage in military education exchange with countries that are connected (i.e, have engaged in education exchange) with these two countries.
 
 
 ```{r}
@@ -347,7 +356,7 @@ Closeness centrality indicates how close a node is to all other nodes in the net
 
 In our network, the top five nodes by closeness centrality are the USA, South Africa, Nigeria, the UK, and Ghana, in that order. 
 
-The visualization below showsthat the USA and South Africa are the top two nodes in terms of closeness centrality.
+The visualization below shows that the USA and South Africa are the top two nodes in terms of closeness centrality.
 
 
 
