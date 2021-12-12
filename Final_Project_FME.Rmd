@@ -170,7 +170,7 @@ NATO_map <- NATO_edges_map %>%
   high = "dark blue",
   na.value = "antiquewhite",
   aesthetics = "fill") +
-  labs(title="NATO Sponsors More FME Than", subtitle = "2021 African Leaders", fill = "Number of Leaders Trained") +
+  labs(title="NATO Sponsors Significantly More FME", subtitle = "2021 African Leaders", fill = "Number of Leaders Trained") +
   theme(title = element_text(size=1)) +
   theme_void()
 
@@ -193,7 +193,7 @@ Warsaw_map <- Warsaw_edges_map %>%
   high = "dark red",
   na.value = "antiquewhite",
   aesthetics = "fill") +
-  labs(title="the Warsaw Pact/Russia", subtitle = "2021 African Leaders", fill = "# of Leaders Trained") +
+  labs(title="Than the Warsaw Pact/Russia", fill = "# of Leaders Trained") +
   theme(plot.title = element_text(size=1)) +
   theme_void()
 
@@ -225,4 +225,3 @@ USA_China_edges_map  %>%
   labs(title="USA and China Contest Influence in Several African Countries", subtitle = "2021 African HOS, Chiefs of Armed Forces & Service Branches") +
   theme_void()
 ```
-
