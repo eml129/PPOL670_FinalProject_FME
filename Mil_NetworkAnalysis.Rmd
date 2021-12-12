@@ -247,6 +247,7 @@ kable(df,caption = "Centrality Score for each Network")
 
 Centrality measures are computed for each node, presented in the table. Here, we compute `Degree`, `Betweenness` and `Closenness` centrality (explained further below). Each centrality measure is depicted in a network plot, where the size of the node represents its centrality score. The top 5 most important countries with regards to centrality measures are depicted below.
 
+
 ### Degree Centrality
 
 The degree centrality of a node is simply its degree—the number of edges it has. The higher the degree, the more central the node is. This can be an effective measure, since many nodes with high degrees also have high centrality by other measures.
