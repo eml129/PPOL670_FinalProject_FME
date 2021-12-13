@@ -1,0 +1,218 @@
+---
+title: "Colonial Legacies"
+author: 
+date: 
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+<style> body {text-align: left} </style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  gganimate = list(
+    nframes = 50
+  ),
+  out.width = '100%'
+)
+```
+
+
+```{r library, include=FALSE}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(haven)
+options(scipen = 999)
+library(ggthemes)
+library(sf)
+library(geojsonio)
+library(patchwork)
+library(lubridate)
+library(tidycensus)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(tidymodels)
+library(rpart)
+library(rpart.plot)
+library(janitor)
+library(themis)
+library(vip)
+library(ranger)
+library(factoextra)
+library(rjson)
+library(mapproj)
+library(crsuggest)
+library(gganimate)
+library(av)
+library(transformr)
+```
+
+## Introduction
+The network communities 1 and 2 appear to somewhat correspond to the French and British colonial empires. The analysis below attempts to investigate a little closer the impact that these empires have on the current FME network in Africa.
+
+## France
+The map below shows the French colonial empire and the number of 2021 African leaders who are graduates from French FME. French military training influence corresponds closely to their former colonial empire.  Indeed, Ghana is the only state which is not a former French colony whose leadership received military training from France. While former colonial status appears to be an important factor in French FME influence, the length of its colonial rule in a particular recipient state does not appear to matter.
+
+```{r french map 1, results='hide'}
+africa_map <- st_read("africa_adm0.geojson")
+France_edges <- read_csv("France_edges.csv")
+Membership <- read_csv("Membership.csv")
+
+France_africa <- left_join(africa_map,
+                                France_edges,
+                                by=c("adm0_a3" ="B_ccode")) 
+
+French_africa <- left_join(France_africa, 
+                           Membership,
+                           by=c("adm0_a3"="Codes")) %>%
+  mutate(French_Group=if_else(GroupNum==1, 1, 0)) %>%
+  mutate(Connections_bi = if_else(Connections!=0, 1, 0)) %>%
+  st_transform(crs=5523)
+
+
+ggplot(French_africa) +
+  geom_sf(aes(fill=Years_Colony)) +
+  scale_fill_continuous(
+    name = "Years under French Colonial Rule",
+    na.value = "antiquewhite",
+    low ="light grey",
+    high="black"
+  ) +
+  geom_point(
+    aes(color=factor(Connections), size=factor(Connections), 
+        geometry = geometry, inherit.aes=FALSE),
+    stat = "sf_coordinates", alpha=0.5)+
+  scale_size_manual(
+    name= "# of 2021 Leaders Trained by France",
+    labels = c("1", "2", "3", "0"),
+    na.value=2,
+    values=c(2, 6, 10))+
+  scale_color_manual(
+    name= "# of 2021 Leaders Trained by France",
+    labels = c("1", "2", "3", "0"),
+    na.value="red",
+    values=c("green", "green", "green")
+  ) +
+  labs(title="Former Colony Status, Not Length of Colonial Rule Determines French FME Influence") +
+    theme_void()
+```
+
+The map below highlights the French FME network community. All African countries within the French network community are former French colonies.  Certainly, several French colonies are not within the FME network community.  In other words, it appears that France's influence in Africa has declined but that its core military network is still robust.  
+
+```{r french map2, results='hide'}
+ggplot(French_africa) +
+  geom_sf(aes(fill=factor(French_Group))) +
+  scale_fill_manual(
+    na.value="white",
+    values=c("antiquewhite", "light blue"),
+    name = "FME Network Community",
+    labels = c("Not French", "French", "No Information")
+  ) +
+  geom_point(
+    aes(size=Years_Colony, 
+        geometry = geometry, color=factor(Connections_bi), inherit.aes=FALSE),
+    stat = "sf_coordinates", alpha=0.5)+
+  scale_size_continuous(
+    range=c(2,10),
+    name = "Years under French Colonial Rule"
+  ) +
+  scale_color_manual(
+    name = "French Trained 2021 Leader",
+    labels = c("Yes", "No"),
+    na.value="red",
+    values="green"
+  ) +
+  labs(title="French FME Community Composed of Former French Colonies") +
+    theme_void()
+```
+
+## United Kingdom
+
+The maps below are the same as those above except for the United Kingdom to ease comparisons.  Similar to France, a recipient state's former colonial status appears to be highly determinant of British FME influence in that state today. The only two states in which the UK has FME influence today and which were not former British colonies are Namibia (which was a South African protectorate) and Rwanda (a former German and Belgium colony). Similar to France, the UK's influence appears to have decreased in general from its influence at the height of its colonial empire.
+
+```{r british map 1, results='hide'}
+africa_map <- st_read("africa_adm0.geojson")
+UK_edges <- read_csv("UK_edges.csv")
+Membership <- read_csv("Membership.csv")
+
+UK_africa <- left_join(africa_map,
+                                UK_edges,
+                                by=c("adm0_a3" ="B_ccode")) 
+
+British_africa <- left_join(UK_africa, 
+                           Membership,
+                           by=c("adm0_a3"="Codes")) %>%
+  mutate(British_Group=if_else(GroupNum==2, 1, 0)) %>%
+  mutate(Connections_bi = if_else(Connections!=0, 1, 0)) %>%
+  st_transform(crs=5523)
+
+
+ggplot(British_africa) +
+  geom_sf(aes(fill=Years_Colony)) +
+  scale_fill_continuous(
+    name = "Years under British Colonial Rule",
+    na.value = "antiquewhite",
+    low ="light grey",
+    high="black"
+  ) +
+  geom_point(
+    aes(color=factor(Connections), size=factor(Connections), 
+        geometry = geometry, inherit.aes=FALSE),
+    stat = "sf_coordinates", alpha=0.5)+
+  scale_size_manual(
+    name= "# of 2021 Leaders Trained by UK",
+    labels = c("1", "2", "3", "0"),
+    na.value=2,
+    values=c(2, 6, 10))+
+  scale_color_manual(
+    name= "# of 2021 Leaders Trained by UK",
+    labels = c("1", "2", "3", "0"),
+    na.value="red",
+    values=c("green", "green", "green")
+  ) +
+  labs(title="Former Colony Status, Not Length of Colonial Rule Determines British FME Influence") +
+    theme_void()
+```
+
+The map below shows that most, though not all, countries within the British FME network community are former British colonies.  Angola, Namibia, and Mozambique are the exceptions. 
+
+```{r british map2, results='hide'}
+ggplot(British_africa) +
+  geom_sf(aes(fill=factor(British_Group))) +
+  scale_fill_manual(
+    na.value="white",
+    values=c("antiquewhite", "light blue"),
+    name = "FME Network Community",
+    labels = c("Not British", "British", "No Information")
+  ) +
+  geom_point(
+    aes(size=Years_Colony, 
+        geometry = geometry, color=factor(Connections_bi), inherit.aes=FALSE),
+    stat = "sf_coordinates", alpha=0.5)+
+  scale_size_continuous(
+    range=c(2,10),
+    name = "Years under British Colonial Rule"
+  ) +
+  scale_color_manual(
+    name = "UK Trained 2021 Leader",
+    labels = c("Yes", "No"),
+    na.value="red",
+    values="green"
+  ) +
+  labs(title="British FME Community Mostly Composed of Former British Colonies") +
+    theme_void()
+```
+
+## Conclusion
+In general, the colonial legacies appear to still affect the African FME network in 2021.  Out of the two, the French colonial legacy appears more robust than the British. There are two potential reasons for this.  First, the French language likely encourages this community to be more insular than the British community which uses the international lingua franca. Where English-speaking elites may choose to interact with many different countries, the French language likely encourages many French-speakers to turn to France and their French-speaking neighbors. Second, France had a very methodical plan to indigenize its colonial militaries in order to transform them into new national militaries upon decolonization (Luckham 1982, p. 67).  The so-called, *Plan Raisonable*, which included steps such as signing Defense Cooperation Agreements with each former colony upon independence, explicitly sought to ensure that France remained in control of the external military forces its newly independent, former colonies (Luckham 1982, 56-58).
