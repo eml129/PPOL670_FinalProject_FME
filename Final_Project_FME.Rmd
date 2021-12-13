@@ -1,23 +1,26 @@
 ---
 title: "Foreign Military Education (FME) Descriptive Data"
+author: 
+date: 
 output: 
   html_document:
     toc: true
     toc_float: true
     theme: united
     highlight: tango
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
 
-<style> body {text-align: justify} </style>
+<style> body {text-align: left} </style>
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 ```
 
 
-```{r library}
+```{r library, include=FALSE}
 library(readr)
 library(tidyverse)
 library(stringr)
@@ -46,8 +49,8 @@ library(crsuggest)
 ```
 
 
-# FME Data
-Using official government and newspaper sources, we compiled a list of 106 current African heads of state (Presidents, Prime Ministers, and Kings) and military elites (Minister of Defense, Chief of the Armed Forces, or Chief of a Military Service) who received military training during their careers.  Out of these 106 leaders, 90 participated in foreign military education courses sponsored by 47 different countries.  The US provided the FME to the most African leaders followed by France, Great Britain, Russia, and China.  Nigeria is the most influential African FME sponsor having trained 11 African leaders outside of Nigeria.
+## FME Data
+Our main variable of interest is foreign military education (FME) relationships.  We created an original dataset of FME relationships using official government and newspaper sources. We compiled a list of 106 current African heads of state (Presidents, Prime Ministers, and Kings) and military elites (Minister of Defense, Chief of the Armed Forces, or Chief of a Military Service) who received military training during their careers.  Out of these 106 leaders, 90 participated in foreign military education courses sponsored by 47 different countries. The US provided the FME to the most African leaders followed by France, Great Britain, Russia, and China.  Nigeria is the most influential African FME sponsor having trained 11 African leaders outside of Nigeria.
 
 ```{r descriptive information}
 FME <- read_csv("FME.csv") %>%
@@ -75,15 +78,15 @@ FME_Sponsor_Short %>%
         x ="Number of African Leaders Trained", 
     y = "Sponsoring Country") +
   theme_minimal()
-
-
 ```
 
-# Maps of FME Relationships
+## Maps of FME Relationships
+We used maps to visually highlight the key players in the African FME network - both inside and outside of Africa.
 
+### Top FME Sponsors
 The maps below indicate that FME-sponsors focus on different countries but both allies (US-UK-France, Russia-China) and potential competitors (US-China, US-Russia) overlap on certain countries.  One could expect that this overlap among allies may complement each others influence in a particular African state whereas overlap between competitors likely counteracts or reduces each others influence. A key determinant in Nigeria's FME relationships appear to be its geographic proximity to its FME partner.
 
-```{r map01}
+```{r map01, results='hide'}
 africa_map <- st_read("africa_adm0.geojson")
 edges <- read_csv("edgelist3.csv")
 
@@ -116,9 +119,12 @@ ggplot() +
          fill="# 2021 Leaders Trained") +
   theme_void()
 ```
+
+### Variation in FME Network Participation
+
 The number of 2021 African leaders trained by various FME-sponsors varies widely.  It appears that certain states like Ghana, Nigeria, South Africa, and Namibia are particularly connected within the FME network.  This means that both the leaders of these countries were trained by numerous FME sponsors and that their countries trained many other African countries' leaders. It is perhaps not surprising that these countries are all located in Sub-Saharan Africa. North Africa is potentially more integrated with the Middle East (although this would require further investigation).
 
-```{r map02}
+```{r map02, results='hide'}
 africa_map <- st_read("africa_adm0.geojson")
 total_edges <- read_csv("edgelist5.csv") %>%
   group_by(B_ccode) %>%
@@ -144,9 +150,11 @@ total_edges_map %>%
   theme_void()
 ```
 
+### Old Rivalries: NATO vs. The Warsaw Pact
+
 The maps below show that NATO has sponsored FME for more African leaders in 2021 than the Warsaw Pact/Russia. Certainly, several African leaders today received training by Warsaw Pact member states during the Cold War and more recently Russia has increased its military training to the continent.  Nonetheless, it is not surprising that NATO, who continued training at high levels during the 1990s, is outperforming the Warsaw Pact/Russia.
 
-```{r map03}
+```{r map03, results='hide'}
 edges_NATO <- edges %>%
   filter(NATO == 1) %>%
   group_by(B_ccode) %>%
@@ -200,9 +208,9 @@ Warsaw_map <- Warsaw_edges_map %>%
 NATO_map + Warsaw_map
 ```
 
-
+### New Competition: US vs. China
 The map below highlights the competition between the US and China with regards to military training in Africa.  As one can see based on the red and blue, the US has trained leaders of more African countries than China.  Nevertheless, one can see that both China and the US have trained leaders in Niger, Nigeria, Liberia, and Namibia. As Nigeria is a major FME-sponsor in its own right, the competition in this country will be particularly important for future FME community formation and influence.
-```{r map04}
+```{r map04, results='hide'}
 USA_China_edges <- read_csv("edgelist4.csv")
 
 USA_China_edges_map <- left_join(
