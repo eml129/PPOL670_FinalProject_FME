@@ -8,6 +8,7 @@ output:
     toc_float: true
     theme: united
     highlight: tango
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
@@ -26,7 +27,15 @@ library(tidyverse)
 library(ggplot2)
 ```
 
-## Read Data
+## Introduction
+The FME literature generally treats FME relationships in a dyadic manner (e.g. Ruby and Gibler 2010; Omelicheva et al. 2017).  In other words, authors often seek to measure the effect that a sponsor's FME relationship has on a recipient state's domestic or foreign policy (e.g. Atkinson 2014; Martinez Machain 2021).  However, FME relationships between states provide interpersonal contacts between the states’ military members.  As such, FME relationships create a social network between military members of various states. As Hafner-Burton, Kahler, and Montgomery (2009) point out, network structures, or the patterns of interactions between agents [states] over time “can define, enable, and constrain those
+agents” (p. 559).  For the purpose of this analysis, we will primarily focus on the states which the military members represent, and therefore I will treat the states as the nodes.  Their ties are their FME relationships.  We are particularly interested in communities and how communities enable and constrain sponsors and recipients. A community has relatively dense ties with one another and has less ties with other groups. Network analysis will allow us to move beyond dyadic relationships and see if and how the network structure impacts how FME sponsorship may affect recipient states' foreign policy.
+
+## Edgelist
+
+The edge list shows the connections between different countries. To compile the edge list, we counted the total number of FME relationships between two countries (either sponsor-recipient or recipient-sponsor). In other words, if 3x individuals from Tanzania were trained in South Africa and 1x individual from South Africa was trained in Tanzania, this was counted as a weighted edge of 4 for the South Africa-Tanzania pair.
+
+In the graph below, we can see the set of edges, and the number of nodes and edges. Here, nodes correspond to countries and edges correspond to military education exchange between countries (i.e., whether a leader from a particular country has engaged military education exchange with another country). 
 ```{r}
 edgelist <- read.csv("edgelist.csv")
 h <- as.matrix(edgelist[,1:2])
@@ -38,9 +47,6 @@ E(i)$weight<-edgelist[,3]
 
 ```
 
-The edge list shows the connections between different countries. To compile the edge list, we counted the total number of FME relationships between two countries (either sponsor-recipient or recipient-sponsor). In other words, if 3x individuals from Tanzania were trained in South Africa and 1x individual from South Africa was trained in Tanzania, this was counted as a weighted edge of 4 for the South Africa-Tanzania pair.
-
-In the graph, we can see the set of edges, and the number of nodes and edges. Here, nodes correspond to countries and edges correspond to military education exchange between countries (i.e., whether a leader from a particular country has engaged military education exchange with another country). 
 
 ## Network Statistics
 
@@ -52,7 +58,9 @@ In the graph, we can see the set of edges, and the number of nodes and edges. He
 
 - *Average path length* is the mean of the shortest distance between each pair of nodes in the network (in both directions for directed graphs).
 
-```{r}
+## FME Network Statistics
+
+```{r stats, results='hide'}
 #Total nodes: 69
 vcount(i)
 
@@ -71,18 +79,34 @@ diameter(i, weights = NA) #7 unweighted
 diam <- get_diameter(i)
 diam 
 
+```
+
+- The FME network contains 69 nodes (countries) & 160 edges (leader has engaged in military education exchange with country i).
+
+- The density of the military education network is 0.068 (or about 7 percent), which is quite low. This indicates that the network is made up of only a few nodes that are connecting to most of the network, with a larger number of nodes that are poorly connected. This low density is a result of the fact that many of the countries in the dataset have no connections in terms of military education exchange. 
+
+- The transitivity of the network is 0.22. Perfect transitivity implies that, if $x$ is connected (through an edge) to $y$, and $y$ is connected to $z$, then $x$ is connected to $z$ as well. However, partial transitivity is useful. In many networks, particularly social ones, the fact that $x$ knows $y$ and $y$ knows $z$ does not guarantee that $x$ knows $z$ as well, but makes it much more likely. In this graph, the transitivity score indicates that 22% of the nodes are transitively connected to each other. 
+
+- The diameter of the network is 8, which means the maximum shortest path in the network has 14 nodes in it. In other words, the maximum distance between any pair of nodes is 8. To find the diameter of the graph, we first find the shortest path between each pair of vertices. The greatest length of any of these paths is the diameter of the graph as seen below.
+
+```{r }
 vcol <- rep("gray40", vcount(i))
 vcol[diam] <- "gold"
 ecol <- rep("gray80", ecount(i))
 ecol[E(i, path=diam)] <- "orange"
 plot(i,layout=layout.sphere, vertex.color=vcol, edge.color=ecol, edge.arrow.mode=0, vertex.label=NA, mfrow=c(1,1), main = "Military Education Network: Diameter\n(Longest Paths in Yellow)")
+```
 
-
+- The plot of the degree distribution of the network has the Y-axis representing the Frequency and the X-axis representing the Degree. In the study of graphs and networks, the degree of a node in a network is the number of connections it has to other nodes and the degree distribution is the probability distribution of these degrees over the whole network. 
+```{r}
 #degree distribution
 deg_dist <- degree_distribution(i, cumulative=T, mode="all")
 plot(x=0:max(degree(i)), y=1-deg_dist, pch=19, cex=1.2, col="orange",
 xlab="Degree", ylab="Cumulative Frequency", main = "Military Education Network: Degree Distribution")
+```
 
+- In network analysis, a clique is a sub-set of a network in which the actors are more closely and intensely tied to one another than they are to other members of the network.The plot below shows the largest cliques in the military education exchange network in yellow, which shows the clique with the the most concentrated degree distribution & density.
+```{r more stats, results='hide'}
 #mean distance
 mean_distance(i) #3.04
 #distances(i) # with edge weights
@@ -93,23 +117,13 @@ vcol <- rep("grey80", vcount(i))
 vcol[unlist(largest_cliques(i))] <- "gold"
 plot(as.undirected(i), vertex.label=NA, vertex.color=vcol, main = "Military Education Network: Cliques")
 
-##
 ```
 
-- According to the above network statistics, we know that the network contains 69 nodes (countries) & 160 edges (leader has engaged in military education exchange with country i).
-
-- The density of the military education network is 0.068 (or about 7 percent), which is quite low. This indicates that the network is made up of only a few nodes that are connecting to most of the network, with a larger number of nodes that are poorly connected. This low density is a result of the fact that many of the countries in the dataset have no connections in terms of military education exchange. 
-
-- The transitivity of the network is 0.22. Perfect transitivity implies that, if $x$ is connected (through an edge) to $y$, and $y$ is connected to $z$, then $x$ is connected to $z$ as well. However, partial transitivity is useful. In many networks, particularly social ones, the fact that $x$ knows $y$ and $y$ knows $z$ does not guarantee that $x$ knows $z$ as well, but makes it much more likely. In this graph, the transitivity score indicates that 22% of the nodes are transitively connected to each other. 
-
-- The diameter of the network is 8, which means the maximum shortest path in the network has 14 nodes in it. In other words, the maximum distance between any pair of nodes is 8. To find the diameter of the graph, we first find the shortest path between each pair of vertices. The greatest length of any of these paths is the diameter of the graph.
-
-- The plot of the degree distribution of the network has the Y-axis representing the Frequency and the X-axis representing the Degree. In the study of graphs and networks, the degree of a node in a network is the number of connections it has to other nodes and the degree distribution is the probability distribution of these degrees over the whole network. 
-
-- In network analysis, a clique is a sub-set of a network in which the actors are more closely and intensely tied to one another than they are to other members of the network.The plot here shows the largest cliques in the military education exchange network in yellow, which shows the clique with the the most concentrated degree distribution & density. 
 
 ## Network Visualization
-```{r}
+
+The network visualization below shows the different communities in the military education exchange network. Qualitatively, a community is defined as a subset of nodes within the graph such that connections between the nodes are denser than connections with the rest of the network. We can see from the visualization & table that communities 1,2,and 3 have a large number of nodes, while the rest of the communities have only 1 or 2 nodes. From the visualization, it seems that most of the countries in the network tend to exchange military education with countries within their "circle." 
+```{r, results='hide'}
 wk <- walktrap.community(i)
 df <- as.data.frame(table(wk$membership))
 names(df) <- c("Community Number", "Size")
@@ -167,20 +181,18 @@ wolf <- plot(wk,i, vertex.label.cex =0.25, main = "Military Education Exchange N
 
 ```
 
-The above network visualization shows the different communities in the military education exchange network. Qualitatively, a community is defined as a subset of nodes within the graph such that connections between the nodes are denser than connections with the rest of the network. We can see from the visualization & table that communities 1,2,and 3 have a large number of nodes, while the rest of the communities have only 1 or 2 nodes. From the visualization, it seems that most of the countries in the network tend to exchange military education with countries within their "circle." 
-
-The two largest communities,2 and 3, are comprised of the following: 
+The two largest communities, 2 and 3, are comprised of the following: 
 
 Community 2 is comprised of Egypt, Kenya, UK, Namibia, USSR_Russia, Angola, South Africa, Uganda, Zimbabwe, Tanzania, India,  Mozambique, Yugoslavia, Lebanon, Palestine, Canada, East Germany, Brazil, and Italy. The presence of both the UK and Russia within the same community is interesting and can possibly be explained in part by those countries’ histories of military or colonial involvement in the countries in this community. 
 
 Community 3 includes USA, Gambia, Ghana, Liberia, Israel, Niger, Nigeria, Algeria, Guinea-Bissau, China, Sierra Leone, Netherlands, Eritrea, Pakistan, Zambia, Libya, Chile, Madagascar, and Rwanda. What is interesting that the USA and China are in the same community, suggesting that other countries within this community tend to engage in military education exchange with both of them, even though they are adversaries.
 
-
 The second largest community, community 1, is made up of mostly African states, and include: Benin, Burkina Faso, Gabon, France, Guinea, Mali, Senegal, Seychelles, Cameroon, Chad, Comoros, Congo, Morocco, Belgium, Mauritania, Germany, Cote d'Ivoire, and Togo. The presence of France and Belgium within this community may suggest the influence of past colonial relationships at work, while the inclusion of Germany is more puzzling.
 
 ## Geographic Network Visualization
 
-```{r addition01}
+The map below displays the network communities geographically.  The geographic display highlights the major powers in the Liberal International Order (the US and Western Europe) as well as the emerging powers, BRICS (Brazil, Russia, India, China, and South Africa), are all tied into the African FME network. France appears to have maintained connections with its former colonial empire in Africa.  Similarly, the UK does as well to some extent, although it appears to compete for influence with Russia.  Furthermore, several Commonwealth nations to include India and Canada are integrated into the community - perhaps due to their ties wtih the UK. Interestingly, the US, China, and Pakistan are within the same community. Perhaps this is indicative of the level of competition within these countries as the US and China also have several ties to the first two communities as well.  Finally, this map shows that smaller powers such as Spain, Singapore, Turkey, Portugal, and Cuba may actively seek out FME relationships with smaller African countries that the major powers are less interested in.
+```{r addition01, results='hide'}
 library(sf)
 world <- read_sf("countries.geojson") 
 membership <- read_csv("Membership.csv")
@@ -210,9 +222,8 @@ membership_map %>%
   theme_void()
 ```
 
-The above map displays the network communities geographically.  The geographic display highlights the major powers in the Liberal International Order (the US and Western Europe) as well as the emerging powers, BRICS (Brazil, Russia, India, China, and South Africa), are all tied into the African FME network. France appears to have maintained connections with its former colonial empire in Africa.  Similarly, the UK does as well to some extent, although it appears to compete for influence with Russia.  Furthermore, several Commonwealth nations to include India and Canada are integrated into the community - perhaps due to their ties wtih the UK. Interestingly, the US, China, and Pakistan are within the same community. Perhaps this is indicative of the level of competition within these countries as the US and China also have several ties to the first two communities as well.  Finally, this map shows that smaller powers such as Spain, Singapore, Turkey, Portugal, and Cuba may actively seek out FME relationships with smaller African countries that the major powers are less interested in.
-
-```{r addition02}
+The below visualization of communities as restricted to the African continent allows us to see how important geographic contiguity appears to be.  Certainly, the French community is split in two.  Similarly, the UK/Russian community is split into Egypt and southern, coastal Africa.  Nonetheless, most African countries within a community border others within the same community. One would expect African states to interact more with their neighbors than states that are further away. This logic does not apply for the interactions of great powers, like the US or China, who are operating at a great distance with all African states.  Therefore, geographic contiguity highlights the importance of relationships between African countries to influence community formation and maintenance.
+```{r addition02, results='hide'}
 africa_map <- st_read("africa_adm0.geojson")
 
 membership_map_africa <- left_join(africa_map, 
@@ -240,13 +251,12 @@ membership_map_africa %>%
   theme_void()      
 ```
 
-The above visualization of communities as restricted to the African continent allows us to see how important geographic contiguity appears to be.  Certainly, the French community is split in two.  Similarly, the UK/Russian community is split into Egypt and southern, coastal Africa.  Nonetheless, most African countries within a community border others within the same community. One would expect African states to interact more with their neighbors than states that are further away. This logic does not apply for the interactions of great powers, like the US or China, who are operating at a great distance with all African states.  Therefore, geographic contiguity highlights the importance of relationships between African countries to influence community formation and maintenance.
 
 ## Centrality
 
 In graph theory and network analysis, methods of centrality assign numbers or rankings to nodes within a graph corresponding to their network position. Applications include identifying the most influential person(s) in a social network, key infrastructure nodes in the Internet or urban networks, super-spreaders of disease, and brain networks, for example. Centrality measures are explored below as a way to identify the most influential countries in our network.
 
-```{r centrality}
+```{r centrality, results='hide'}
 #Centrality table
 Degree <- degree(i,mode = "all")
 Betweenness <- betweenness(i)
