@@ -216,3 +216,5 @@ ggplot(British_africa) +
 
 ## Conclusion
 In general, the colonial legacies appear to still affect the African FME network in 2021.  Out of the two, the French colonial legacy appears more robust than the British. There are two potential reasons for this.  First, the French language likely encourages this community to be more insular than the British community which uses the international lingua franca. Where English-speaking elites may choose to interact with many different countries, the French language likely encourages many French-speakers to turn to France and their French-speaking neighbors. Second, France had a very methodical plan to indigenize its colonial militaries in order to transform them into new national militaries upon decolonization (Luckham 1982, p. 67).  The so-called, *Plan Raisonable*, which included steps such as signing Defense Cooperation Agreements with each former colony upon independence, explicitly sought to ensure that France remained in control of the external military forces its newly independent, former colonies (Luckham 1982, 56-58).
+
+## <a href="https:///eml129.github.io/PPOL670_FinalProject_FME/">Navigation Page</a>
