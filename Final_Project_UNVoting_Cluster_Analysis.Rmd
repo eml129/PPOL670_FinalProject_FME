@@ -1,34 +1,27 @@
 ---
 title: "UN Voting Cluster Analysis"
-author: "Erin Lemons (eml129), Kenton Thibault (akt44), Bria Pullin (bnp21)"
-date: "12/07/2021"
+author: 
+date: 
 output: 
   html_document:
     toc: true
     toc_float: true
     theme: united
     highlight: tango
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
 
-<style> body {text-align: justify} </style>
+<style> body {text-align: left} </style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 ```
 
-```{r include = FALSE}
-def.chunk.hook  <- knitr::knit_hooks$get("chunk")
-knitr::knit_hooks$set(chunk = function(x, options) {
-  x <- def.chunk.hook(x, options)
-  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
-})
 
-```
-
-```{r library}
+```{r library, include=FALSE}
 library(readr)
 library(tidyverse)
 library(stringr)
@@ -56,8 +49,8 @@ library(mapproj)
 library(crsuggest)
 ```
 
-## Read Data
-```{r formatting data and visualizing}
+## Introduction
+```{r formatting data and pca, results='hide'}
 UNvoting <- read_csv("UNVotes.csv")
 
 Africa_ccodes = c("2", "200", "220", "365", "710", "402", "403", "404", "411", "420", "432", "433", "434", "435", "436", "437", "438", "439", "450", "451", "452", "461", "471", "475", "481", "482", "483", "484", "490", "500", "501", "510", "516", "517", "520", "522", "530", "531", "540", "541", "551", "552", "553", "560", "565", "570", "571", "572", "580", "581", "590", "591", "600", "615", "616", "620", "625", "626", "651")
@@ -73,10 +66,7 @@ UN_Imp_Votes_Org <- UNvoting %>%
 
 UN_Imp_Votes <- UN_Imp_Votes_Org %>%
   pivot_wider(names_from=resid, values_from=vote)
-```
 
-## PCA
-```{r models}
 UN_Imp_Votes[1:6, 1:6]
 UN_Imp_Votes_1 <- UN_Imp_Votes %>%
   na.omit() %>%
@@ -98,8 +88,12 @@ UN_pcs <- bind_cols(
 
 summary(UN_pca)
 ```
+Does influence in the FME network and influence in individual recipient states (as operationalized by number of top leaders trained) translate into foreign policy outcomes favorable to the sponsoring state?  Per the literature on foreign military education, states such as the US and China sponsor foreign military education in order to induce recipient states to make foreign policy concessions (such as voting with them in the UN) or because the recipient state's ideology is in alignment with theirs (Martinez Machain 2021; Devermont et al. 2021).  In either case, one would expect recipient states, especially those within the same network community or in which the sponsor has gained influence within the country's leadership, to vote similarly to the sponsoring state - at least on important issues. The US, France, the UK, Russia, and China sponsor the most foreign military education for African countries. Therefore, on votes which the US considers important, we expect to see at least 3 clusters. One cluster around the US, UK, and France, one cluster around Russia and China, and one cluster of countries which "hedge." Hedging occurs when countries participate in cooperative relationships with more than one adversarial major power in order to provide themselves with more foreign policy autonomy. In other words, some countries do not strictly side with one group of major powers (engage in foreign military education relationships with both China and the US for example) and thereby provide themselves with reasonable alternatives which frees them from some of the great power influence. For this analysis, we include all 54 African countries, the US, UK, France, Russia, and China for all UN votes in 2018 which the US coded as "important." 2018 (UN session 72) was the most recent year with US coding.  There are a total of 17 votes.  
+
+We use machine learning cluster analysis on the UN General Assembly Voting dataset (Voeten 2013).  First, we conduct Principle Component Analysis. The predictors for the clustering are the principle components from the UN voting behavior on votes important to the US in 2018. The principle components are uncorrelated and capture the variation within the data.  The first principle component captures the most variation and each successive one captures less individual variation but adds to how much all the principle components (up to then) capture cumulatively. We decided to use all principle components for this cluster analysis because I want to capture the actual clusters based on the complete voting behavior of each state.  We use a K-means algorithm. The algorithm randomly places K centroids in my n-dimensional vector space. Then, it calculates the nearest centroid for each point using a distance measure. It assigns each point to the nearest centroid. It then recalculates the position of the centroids based on the means of the assigned points. It keeps repeating these steps until no points change cluster assignments. Two key decisions for this algorithm are (1) the number of clusters and (2) the number of random starts. Below, we use several methods to determine the number of clusters: WSS, silhouette, and the gap statistic.  The gap statistic suggests that we should only have 1 cluster; in other words, this suggests that there may be no clear clusters. Nevertheless, we choose 3 clusters because the WSS, silhouette, and our own "SME" opinion suggest that we should have 3 clusters. Furthermore, it will be inherently more interesting to see if said 3 clusters reflect any clustering of interest than to go in with the belief from the get-go that all data belongs in the same cluster. We use 100 random starts.
+
 ## Cluster Analysis
-```{r estimation}
+```{r estimation, results='hide'}
 fviz_nbclust(UN_Numeric, FUN = kmeans, method = "wss")
 fviz_nbclust(UN_Numeric, FUN = kmeans, method = "silhouette")
 fviz_nbclust(UN_Numeric, FUN = kmeans, method = "gap_stat")
@@ -113,7 +107,13 @@ select(UN_pcs, PC1, PC2),
 cluster3 = UN_kmeans3$cluster)
 
 mpowers <- c("USA", "GBR", "FRA", "CHN", "RUS")
+```
 
+## Visualization of Clusters
+
+Below is a visualization of the clusters with the first and second principle components.  The visualization indicates that the UK and France are extremely closely aligned and that they are more closely aligned with African state voting behavior than the US, even though the US is within the same group.
+
+```{r plot of clusters, results='hide'}
 ggplot() +
   geom_point(data = UN_clusters, 
              aes(PC1, PC2, 
@@ -131,7 +131,8 @@ ggplot() +
 
 ## Map of Clusters
 
-```{r map}
+Below we provide a geographic visualization of the clusters.  As expected, the US, UK, and France are aligned on voting with a few African countries. China and Russia are in a different cluster with two African countries: Zimbabwe and Burundi.  Given the history of these state-relations, these results are not surprising. Perhaps what is most noteworthy is the vast majority of African state vote unaligned.  The ultimate question, which we address more in the next section, is whether or not FME relationships shed light on this voting behavior.
+```{r map, results='hide'}
 
 africa_map <- st_read("africa_adm0.geojson")
 
