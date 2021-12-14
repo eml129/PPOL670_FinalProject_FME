@@ -233,3 +233,5 @@ USA_China_edges_map  %>%
   labs(title="USA and China Contest Influence in Several African Countries", subtitle = "2021 African HOS, Chiefs of Armed Forces & Service Branches") +
   theme_void()
 ```
+
+## <a href="https:///eml129.github.io/PPOL670_FinalProject_FME/">Navigation Page</a>

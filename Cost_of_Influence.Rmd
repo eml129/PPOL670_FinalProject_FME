@@ -17,14 +17,6 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  gganimate = list(
-    nframes = 50
-  ),
-  out.width = '100%'
-)
 ```
 
 
@@ -58,6 +50,8 @@ library(gganimate)
 library(av)
 library(transformr)
 ```
+
+
 
 ## Introduction
 ```{r read data, results='hide'}
@@ -158,7 +152,7 @@ animated_map2 <- ggplot(Milaid_africa) +
     stat = "sf_coordinates", alpha=0.5)+
   scale_size_continuous(range=c(0, 30),
                         breaks=c(500, 10000),
-                        name = "Mil Aid by US in Given Year in Constant US $100,000")+
+                        name = "US Mil Aid in Given Year in Constant US $100,000")+
   scale_color_manual(
     na.value = "black",
     values = c("light green", 
@@ -168,7 +162,7 @@ animated_map2 <- ggplot(Milaid_africa) +
   )+
     theme_void()+
   transition_time(Year, range=c(1954, 2019)) +
-  labs(title= "US Military Aid", subtitle = "Year: {frame_time}", caption="Data Source: U.S. Overseas Loans and Grants (Greenbook)")
+  labs(title= "US Military Aid Not Strongly Correlated with FME Influence", subtitle = "Year: {frame_time}", caption="Data Source: U.S. Overseas Loans and Grants (Greenbook)")
 
 animate(
   animated_map2 + enter_fade() + exit_fade(), duration = 30,
@@ -221,3 +215,5 @@ cor(MilAid_correlations2$`mean(Amount)`, MilAid_correlations2$Influence)
 ## Conclusion
 
 The US provides a significant amount of military aid to and trains a large number of military members from African countries in order to have the importance that it does in the African FME network.  Nevertheless, there do not appear to be any strong correlations between US military aid, training numbers, and the number of African leaders trained by the US. While this does not make sense from a dyadic analysis point of view, it does when considering the network as whole and especially the strategic competition.  In other words, African countries select from among many different FME sponsors (and many times they opt to work with more than one FME sponsor at time). One question taxpayers might raise, are US expenditures worth the outcomes?  There is no easy answer to this question. Nevertheless, one must bear in mind that within strategic competition, even a draw can be a win.  In other words, if the US spends enough money and trains enough soldiers in recipient state A to compete with a potential adversary such as the Soviet Union, this may mean that neither the US nor the Soviet Union have much influence in state A. While this outcome may be worse for the US, than significant influence in state A, it is better for the US, than the Soviet Union having significant influence in state A.
+
+## <a href="https:///eml129.github.io/PPOL670_FinalProject_FME/">Navigation Page</a>

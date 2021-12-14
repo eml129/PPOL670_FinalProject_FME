@@ -406,10 +406,7 @@ ledges <- data.frame(color = palette()[unique(E(i)$weight)], label =unique(E(i)$
 visLegend(k, main="Communities",addEdges = ledges, position="left", ncol=3)
 ```
 
-
-
-
-
+## <a href="https:///eml129.github.io/PPOL670_FinalProject_FME/">Navigation Page</a>
 
 
 
