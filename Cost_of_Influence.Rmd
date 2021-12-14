@@ -1,16 +1,19 @@
 ---
 title: "Cost of Influence"
+author: 
+date: 
 output: 
   html_document:
     toc: true
     toc_float: true
     theme: united
     highlight: tango
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
 
-<style> body {text-align: justify} </style>
+<style> body {text-align: left} </style>
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
@@ -25,7 +28,7 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r library}
+```{r library, include=FALSE}
 library(readr)
 library(tidyverse)
 library(stringr)
@@ -56,8 +59,8 @@ library(av)
 library(transformr)
 ```
 
-# Read Data 
-```{r read data}
+## Introduction
+```{r read data, results='hide'}
 africa_map <- st_read("africa_adm0.geojson")
 US_trainees <- read_csv("US_Training_Numbers.csv")
 US_edges <- read_csv("US_edges.csv")
@@ -70,8 +73,12 @@ US_africa <- left_join(US_trainees_africa,
                        by=c("adm0_a3" = "B_ccode")) %>%
   st_transform(crs=5523)
 ```
+As the FME data shows, the US provide military education to the most 2021 African leaders. Furthermore, the network analysis indicates that the US is ranked first in all network centrality measures.  These findings suggest that the US is very influential within Africa's FME network. Below we will analyze how the US achieves this level of influence.
 
-# Map of US FME Sponsorship
+## Map of US FME Sponsorship
+
+The FME literature generally uses the past 5-years of US-training numbers to capture US FME influence in a recipient state (e.g., Savage and Caverley 2017; Martinez Machain 2021).  Therefore, I graph the total numbers of foreign military members the US trained in an African country per year from 2016 to 2020. The map highlights two important take-aways.  First, training numbers can vary dramatically from year-to-year within the same recipient state. Second, training numbers do not appear to be highly correlated with the number of trainees who are promoted to the top positions within a recipient state.  This could be in part due to the fact that it may often take much longer than 5-years post-FME graduation to get promoted to the top leadership positions.  After all, while some of the 2021 African leaders participated in FME within the last five years, many participated in FME during the Cold War and a few even were trained while their countries were still colonies.
+
 ```{r animated map}
 animated_map <- ggplot(US_africa) +
   geom_sf(fill="antiquewhite") +
@@ -100,4 +107,117 @@ animate(
 )
 ```
 
-# Map of US Military Aid
+```{r further analysis, results='hide'}
+US_trainees %>%
+  summarize(sum(NumTrained))
+
+US_trainees_stats <- US_trainees %>%
+  group_by(Code) %>%
+  summarize(sum(NumTrained), median(NumTrained), mean(NumTrained))
+
+US_correlations <- left_join(US_trainees_stats,
+                             US_edges,
+                             by=c("Code"="B_ccode"))
+
+US_correlations <- US_correlations %>%
+  mutate(Influence = replace_na(US_correlations$Connections, 0))
+
+cor(US_correlations$`sum(NumTrained)`, US_correlations$Influence)
+cor(US_correlations$`median(NumTrained)`, US_correlations$Influence)
+cor(US_correlations$`mean(NumTrained)`, US_correlations$Influence)
+```
+The data provides additional support for what the map suggests.  In the last 5 years from 2016 to 2020, the US trained 32,364 military members from African countries.  Nevertheless, these numbers did not necessarily directly translate into influence within a recipient state's leadership.  For example, the US trained an average of 1,264 Rwandan soldiers a year but no one in Rwanda's top military leadership was trained by the US. Averages, however, tend to be highly biased by a few outlier years.  Egypt was the recipient state with the highest median of soldiers trained by the US with a yearly median of 358 soldiers. The current leader of Egypt was trained in the US.  Indeed, the correlation between US yearly median of soldiers trained in a country and influence within a country's leadership is higher than correlations between the sum or mean of soldiers trained.  Nonetheless, even the correlation between the yearly median of soldiers trained and influence is very low at 0.13.
+
+## Map of US Military Aid
+
+Savage and Caverley (2017; p. 549) and Devermont et al. (2021, p. 7) argue that a sponsoring state’s total aid to a recipient state is correlated to the amount of FME it sponsors.  Therefore, we investigate below the relationship between US military aid and FME influence.
+
+```{r read milaid, results='hide'}
+MilAid <- read_csv("MilAid.csv") %>%
+  pivot_longer(cols = "1954":"2019", names_to = "Year", values_to = "Amount") %>%
+  mutate(Year=as.numeric(Year)) %>%
+  mutate(Amount=Amount/100000)
+
+US_milaid_africa <- left_join(africa_map,
+                                MilAid,
+                                by=c("adm0_a3" ="Code")) 
+Milaid_africa <- left_join(US_milaid_africa,
+                       US_edges,
+                       by=c("adm0_a3" = "B_ccode")) %>%
+  st_transform(crs=5523)
+```
+
+The key takeaways from the map below are that Egypt receives by far more military aid from the United States than any other African country.  Furthermore, aid appears to peak toward the end of the Cold War and within the last 10 years -- both arguably at times of increased strategic competition with potential competitors such as the Soviet Union and China. There does not appear to be any strong correlation between military aid and US FME influence in terms of number of 2021 African leaders trained.
+```{r animated map2}
+animated_map2 <- ggplot(Milaid_africa) +
+  geom_sf(fill="antiquewhite") +
+  geom_point(
+    aes(color=factor(Connections), 
+        size = Amount, 
+        geometry = geometry, frame=Year, cumulative=FALSE),
+    stat = "sf_coordinates", alpha=0.5)+
+  scale_size_continuous(range=c(0, 30),
+                        breaks=c(500, 10000),
+                        name = "Mil Aid by US in Given Year in Constant US $100,000")+
+  scale_color_manual(
+    na.value = "black",
+    values = c("light green", 
+               "green", 
+               "dark green"),
+    name = "# of 2021 Leaders Trained by US"
+  )+
+    theme_void()+
+  transition_time(Year, range=c(1954, 2019)) +
+  labs(title= "US Military Aid", subtitle = "Year: {frame_time}", caption="Data Source: U.S. Overseas Loans and Grants (Greenbook)")
+
+animate(
+  animated_map2 + enter_fade() + exit_fade(), duration = 30,
+  renderer = av_renderer()
+)
+```
+
+Further analysis of the data supports the major take-aways from the map. From 1954-2019, the US spent $926.4 billion in military aid to Africa in constant US dollars. 81% of all US military aid during that time was given to Egypt. The correlations between US FME influence in a recipient state in 2021 and the sum, yearly median, and yearly mean of US military aid to that state are all negligble at less than 0.06 each. The correlations do not get stronger if one restricts the analysis to 2016 and later.
+
+```{r additional analysis, results='hide'}
+MilAid %>%
+  summarize(sum(Amount))
+
+MilAid %>%
+  filter(Code=="EGY") %>%
+  summarize(sum(Amount))
+
+MilAid_stats <- MilAid %>%
+  group_by(Code) %>%
+  summarize(sum(Amount), median(Amount), mean(Amount))
+
+MilAid_correlations <- left_join(MilAid_stats,
+                             US_edges,
+                             by=c("Code"="B_ccode"))
+
+MilAid_correlations <- MilAid_correlations %>%
+  mutate(Influence = replace_na(MilAid_correlations$Connections, 0))
+
+cor(MilAid_correlations$`sum(Amount)`, MilAid_correlations$Influence)
+cor(MilAid_correlations$`median(Amount)`, MilAid_correlations$Influence)
+cor(MilAid_correlations$`mean(Amount)`, MilAid_correlations$Influence)
+
+MilAid_stats_since2016 <- MilAid %>%
+  filter(Year >= 2016) %>%
+  group_by(Code) %>%
+  summarize(sum(Amount), median(Amount), mean(Amount))
+
+MilAid_correlations2 <- left_join(MilAid_stats_since2016,
+                             US_edges,
+                             by=c("Code"="B_ccode"))
+
+MilAid_correlations2 <- MilAid_correlations2 %>%
+  mutate(Influence = replace_na(MilAid_correlations2$Connections, 0))
+
+cor(MilAid_correlations2$`sum(Amount)`, MilAid_correlations2$Influence)
+cor(MilAid_correlations2$`median(Amount)`, MilAid_correlations2$Influence)
+cor(MilAid_correlations2$`mean(Amount)`, MilAid_correlations2$Influence)
+```
+
+## Conclusion
+
+The US provides a significant amount of military aid to and trains a large number of military members from African countries in order to have the importance that it does in the African FME network.  Nevertheless, there do not appear to be any strong correlations between US military aid, training numbers, and the number of African leaders trained by the US. While this does not make sense from a dyadic analysis point of view, it does when considering the network as whole and especially the strategic competition.  In other words, African countries select from among many different FME sponsors (and many times they opt to work with more than one FME sponsor at time). One question taxpayers might raise, are US expenditures worth the outcomes?  There is no easy answer to this question. Nevertheless, one must bear in mind that within strategic competition, even a draw can be a win.  In other words, if the US spends enough money and trains enough soldiers in recipient state A to compete with a potential adversary such as the Soviet Union, this may mean that neither the US nor the Soviet Union have much influence in state A. While this outcome may be worse for the US, than significant influence in state A, it is better for the US, than the Soviet Union having significant influence in state A.
