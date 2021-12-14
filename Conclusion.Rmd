@@ -1,0 +1,216 @@
+---
+title: "Bringing It All Together"
+author: 
+date: 
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+<style> body {text-align: left} </style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r library, include=FALSE}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(haven)
+options(scipen = 999)
+library(ggthemes)
+library(sf)
+library(geojsonio)
+library(patchwork)
+library(lubridate)
+library(tidycensus)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(tidymodels)
+library(rpart)
+library(rpart.plot)
+library(janitor)
+library(themis)
+library(vip)
+library(ranger)
+library(factoextra)
+library(rjson)
+library(mapproj)
+library(crsuggest)
+library(gganimate)
+library(av)
+library(transformr)
+```
+
+## Does FME Sponsorship Matter?
+
+Does FME-sponsorship lead to sponsor's influence on a recipient state's foreign policy? The maps below highlight the countries in which US-FME graduates are national leaders in 2021 and the countries which voted with the US on important UN votes in 2018. There is not a lot of overlap.
+```{r comparison1, results='hide'}
+africa_map <- st_read("africa_adm0.geojson")
+edges <- read_csv("edgelist3.csv")
+
+US_edges_map <- left_join(
+  africa_map, 
+  edges,
+  by=c("adm0_a3" ="B_ccode")) %>%
+  filter(A_ccode == "USA")
+
+m1 <- ggplot() +
+  geom_sf(data=africa_map)+
+  geom_sf(
+    data=US_edges_map, 
+    aes(fill=Connections), 
+    inherit.aes = FALSE)  +
+  scale_fill_continuous(
+      low="light blue",
+      high="dark blue")+
+    labs(title="US-Trained Leaders Do Not Necessarily Vote with US",
+         subtitle = "US-FME Graduates in Leadership Positions",
+         fill="# 2021 Leaders Trained by US") +
+  theme_void()
+
+UNvoting <- read_csv("UNVotes.csv")
+set.seed(20201020)
+Africa_ccodes = c("2", "200", "220", "365", "710", "402", "403", "404", "411", "420", "432", "433", "434", "435", "436", "437", "438", "439", "450", "451", "452", "461", "471", "475", "481", "482", "483", "484", "490", "500", "501", "510", "516", "517", "520", "522", "530", "531", "540", "541", "551", "552", "553", "560", "565", "570", "571", "572", "580", "581", "590", "591", "600", "615", "616", "620", "625", "626", "651")
+
+UN_Imp_Votes_Org <- UNvoting %>%
+  filter(session==72) %>%
+  filter(importantvote==1) %>%
+  filter(ccode %in% Africa_ccodes) %>%
+  select(resid, ccode, Country, vote) %>%
+  mutate(vote=replace(vote, vote==2, 0)) %>%
+  mutate(vote=replace(vote, vote==3, -1)) %>%
+  mutate(vote=replace(vote, vote==8, 0))
+
+UN_Imp_Votes <- UN_Imp_Votes_Org %>%
+  pivot_wider(names_from=resid, values_from=vote)
+
+UN_Imp_Votes[1:6, 1:6]
+UN_Imp_Votes_1 <- UN_Imp_Votes %>%
+  na.omit() %>%
+  select(-ccode)
+
+UN_Numeric <- UN_Imp_Votes_1 %>%
+  select_if(is.numeric)
+
+UN_pca <- prcomp(UN_Numeric)
+
+UN_pcs <- UN_pca %>%
+  .$x %>%
+  as_tibble()
+
+UN_pcs <- bind_cols(
+  select(UN_Imp_Votes_1, Country),
+  UN_pcs
+)
+UN_kmeans3 <- kmeans(UN_Numeric, centers = 3, 
+                     nstart = 100)
+
+UN_clusters <- bind_cols(
+  select(UN_Imp_Votes_1, Country),
+select(UN_pcs, PC1, PC2),
+cluster3 = UN_kmeans3$cluster)
+
+UN_clusters_africa <- UN_clusters %>%
+  filter(Country!= "USA") %>%
+  filter(Country!= "RUS") %>%
+  filter(Country!= "FRA") %>%
+  filter(Country!= "CHN") %>%
+  filter(Country!= "GBR")
+
+africa_clusters_map <- left_join(africa_map, 
+                                 UN_clusters_africa, 
+                                 by=c("adm0_a3" = "Country"))
+
+m2 <- africa_clusters_map %>%
+  st_transform(crs=5523) %>%
+  ggplot() +
+  geom_sf(aes(fill = factor(cluster3)))  + 
+  scale_fill_manual(values = c("blue", "red", "yellow"),
+                    name = "UN Voting Alignment",
+                    labels = c("with US, France, Britain", 
+                               "with China and Russia", 
+                               "Unaligned",
+                               "No Information")) +
+  labs(title = "",
+       subtitle = "2018 US-Important UN Votes",
+       caption = "Data: Erik Voeten's UN Voting Dataset") +
+  theme_void()
+
+m1 + m2
+```
+
+Next we consider the effect of FME network communities.  In other words, perhaps small state interaction densities also impact foreign policy decisions in addition to dyadic relationships with great powers.  There does appear to be some interaction between network community and US-trained African country leadership with the countries' UN voting behavior.  Unfortunately, we will need to collect more data.  Of the 14 states who voted similarly to the US on US-deemed important UN General Assembly votes in 2018, we are missing data on 4 states.  Of the remaining 10 states, 6 are within the US FME network community: Ghana, Guinea-Bissau, Niger, Liberia, Madagascar, and Rwanda.  Three of those 6 also have US-trained leaders: Ghana, Niger, and Liberia.  The 4 African countries who voted similarly to the US and who are not within the same FME network community are: Benin, Cameroon, Sao Tome and Principe, and Togo.  Interestingly, three of those (Benin, Cameroon, and Togo) are all contiguous to others who voted with the US and are in the US FME network.  In other words, this suggests that social networks and the density of state interactions may still play a large role in foreign policy decision-making.  
+```{r comparison2, results='hide'}
+criteria<- c(3, 20)
+membership <- read_csv("Membership.csv") 
+
+membership_map_africa <- left_join(africa_map, 
+                            membership, 
+                            by=c("adm0_a3" = "Codes")) %>%
+  mutate(GroupNum=replace_na(GroupNum, 20)) %>%
+  mutate(US_Group = case_when(GroupNum==3 ~ 1, 
+         GroupNum == 20 ~ 2,
+         (GroupNum == 1 | GroupNum == 2 | GroupNum ==4 | GroupNum ==5 | GroupNum ==6 | GroupNum==7 | GroupNum ==8) ~ 3))
+
+US_edges <- edges %>%
+   filter(A_ccode == "USA") %>%
+  mutate(Connections_bi = if_else(Connections != 0, 1, 0))
+
+membership_map_africa2 <- left_join(membership_map_africa,
+                                    US_edges,
+                                    by=c("adm0_a3" = "B_ccode"))
+
+
+m3 <- membership_map_africa2 %>%
+  st_transform(crs=5523) %>%
+  ggplot()+
+  geom_sf(aes(fill=factor(US_Group)))+
+  scale_fill_manual(
+    values = c("blue", "white", "antiquewhite"),
+    name = "FME Network Communities",
+    labels = c("US and China",
+               "No Information",
+               "Other")) +
+  geom_point(aes(shape=factor(Connections_bi), geometry = geometry), stat = "sf_coordinates") +
+  scale_shape_discrete(
+    name="US-Trained Leaders",
+    labels=c("Yes", "No")
+  ) +
+  labs(title="US-Trained Leaders & US FME Community Together Likely Affect UN Voting", subtitle = "African Leaders in 2021") +
+  theme_void()      
+
+m3 + m2
+```
+
+```{r comparison3, results='hide'}
+
+membership_map_africa3 <- left_join(membership_map_africa2,
+                                    UN_clusters_africa,
+                                    by=c("adm0_a3" = "Country"))
+
+membership_map_africa4 <- membership_map_africa3 %>%
+  filter(cluster3==1) #14
+
+#4 countries no information for
+
+membership_map_africa5 <- membership_map_africa4 %>%
+  filter(Connections_bi==1) # 4
+
+membership_map_africa6 <- membership_map_africa4 %>%
+  filter(US_Group==1) #6
+
+# overlap of 3
+
+```
+
+## Next Steps
+The next steps for this project are to collect the complete information for African leadership - to include those states that are currently missing data.  Furthermore, while we used data from approximately similar years for this analysis (leaders in power in 2021 and UN voting data from 2018) due to data availability, we will want to run these analyses again with the exact same years. Furthermore, in the future we will want to take other variables into consideration such as GDP, population, military size, intrastate conflicts, etc. Nevertheless, this analysis suggests that influence is likely an interaction between great powers' material power and ideological preferences and small states interactions, interdependence, and foreign policy coordination. Furthermore, we have only considered the military dimension here and certainly countries use a variety of tools to influence other states.  In short, influence is a multidimensional game.
