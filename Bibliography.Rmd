@@ -16,7 +16,10 @@ knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 ```
 
-# Bibliography
+## Works Cited
+
+Atkinson, Carol. *Military Soft Power: Public Diplomacy through Military Educational Exchanges.* New York: Rowman and Littlefield, 2014.
+
 
 Barkawi, Tarak. “‘Defense Diplomacy’ in North-South Relations.”  *International Journal* 66, no. 3 (2011): 597-612. 
 
@@ -24,8 +27,158 @@ Bodetti, Austin. "Through Eritrea, China Quietly Makes Inroads Near the Red Sea.
 
 Cascais, Antonio. "Who is Angola's new president Joao Lourenco?" *Deutsche Welle* (26 September 2017). Available at: https://www.dw.com/en/who-is-angolas-new-president-joao-lourenco/a-40218458
 
+Devermont, Judd, Marielle Harris, and Alison Albelda. “Personal Ties: Measuring Chinese and U.S. Engagement with African Security Chiefs.” *CSIS Briefs.* 4 August 2021. Accessed 5 
+December 2021.  Available at: https://www.csis.org/analysis/personal-ties-measuring-chinese-and-us-engagement-african-security-chiefs. 
+
+Hafner-Burton, Emilie M., Miles Kahler, and Alexander H. Montgomery. “Network Analysis for International Relations.” *International Organization* 63, no. 3 (July 2009): 559-592.
+
 Hoffman, Jonathan. “The Return of Great Power Competition to the Middle East: A Two-Level Game.” *Middle East Policy* 28, no. 1 (2021): 87-104.
 
 The Kremlin, "Russian-Angolan Talks." 4 April 2019. Available at: http://en.kremlin.ru/events/president/news/60223 
 
 Kroenig, Matthew. *The Return of Great Power Rivalry: Democracy versus Autocracy from the Ancient World to the U.S. and China*.  New York, NY: Oxford University Press, 2020.
+
+Luckham, Robin. “French Militarism in Africa.” *Review of African Political Economy* 9, no. 24 (1982): 55-84.
+
+Martinez Machain, Carla. “Exporting Influence: U.S. Military Training as Soft Power.” *Journal of Conflict Resolution* 65, no. 2-3 (2021): 313-341.
+
+Omelicheva, Mariya, Brittnee Carter, and Luke B. Campbell. “Military Aid and Human Rights: Assessing the Impact of U.S. Security Assistance Programs.” *Political Science Quarterly*
+	132, no. 1 (November 2017): 119-144.
+
+Ruby, Tomislav Z. and Douglas Gibler. “US Professional Military Education and Democratization Abroad.” *European Journal of International Relations* 16, no. 3 
+(September 2010): 339-364.
+
+Savage, Jesse Dillon and Jonathan D. Caverley. “When Human Capital Threatens the Capitol: Foreign Aid in the Form of Military Training and Coups.” *Journal of Peace Research* 54, 
+no. 4 (July 2017): 542-557.
+
+## Data Sources
+
+Department of State and Department of Defense. *Foreign Military Training and DoD Engagement Activities of Interest.* Reports to Congress. Available at: https://www.state.gov/foreign-military-training-and-dod-engagement-activities-of-interest/
+
+USAID. *U.S. Overseas Loans and Grants (Greenbook) Data.* Updated 20 August 2021. Available at: https://data.usaid.gov/Administration-and-Oversight/U-S-Overseas-Loans-and-Grants-Greenbook-Data/7cnw-pw8v
+
+Voeten, Erik. "Data and Analyses of Voting in the UN General Assembly" Routledge Handbook of International Organization, edited by Bob Reinalda (published May 27, 2013). Available at SSRN: http://ssrn.com/abstract=2111149]
+
+### Original FME Dataset Sources
+
+* https://www.gov.za/about-government/contact-directory/thandi-modise-honourable; Modise, Thandi and Robyn Curnow. "Thandi Modise, A Woman in War." Agenda, No. 43 (2000): 36-40.
+* https://www.defenceweb.co.za/joint/government-affairs/cv-of-general-rudzani-maphwanya/
+* https://www.defenceweb.co.za/featured/mbatha-is-new-sa-army-chief/
+* https://www.defenceweb.co.za/joint/government-affairs/curriculum-vitae-of-lieutenant-general-wiseman-s-mbambo-chief-of-the-south-african-air-force/
+* https://www.defenceweb.co.za/sa-defence/sa-defence-sa-defence/hlongwane-named-new-navy-chief/?catid=111%3Asa-defence&Itemid=242
+* https://www.presidency.eg/en/%D8%A7%D9%84%D8%B1%D8%A6%D8%A7%D8%B3%D8%A9/%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3/
+* https://www.mod.gov.eg/ModWebSite/MODL.aspx
+* https://www.egypttoday.com/Article/1/109270/President-Sisi-appoints-Lieutenant-General-Osama-Askar-chief-of-staff
+* https://english.ahram.org.eg/NewsContent/1/1237/436688/Egypt/Defense/Meet-LieutenantGeneral-Osama-Askar-The-Egyptian-Ar.aspx
+* https://pledgetimes.com/who-is-osama-askar-chief-of-staff-of-the-new-egyptian-army/
+* https://www.mod.gov.eg/ModWebSite/CAFL.aspx
+* https://www.mod.gov.eg/ModWebSite/CONL.aspx
+* https://www.mod.gov.eg/ModWebSite/CADL.aspx
+* https://www.bbc.com/news/world-africa-12890807; * https://www.globalsecurity.org/military/world/nigeria/muhammadu-buhari.htm
+* http://defence.gov.ng/major-general-bashir-salihi-magashi-rtd/
+* https://www.thecable.ng/all-eyes-on-magashi 
+* https://www.blueprint.ng/defence-minister-pledges-to-deepened-cooperation-with-pakistan-to-end-extremism/
+* https://army.mil.ng/?page_id=253
+* https://globalupfront.com/2021/05/27/major-general-farouk-yahaya-new-chief-of-army-staff-all-you-need-to-know/
+* https://www.airforce.mil.ng/leadership
+* https://www.dw.com/en/who-is-angolas-new-president-joao-lourenco/a-40218458
+* https://www.clbrief.com/angolan-president-rejuvenates-government-in-the-middle-of-economic-crisis/
+* https://governo.gov.ao/ao/gca/index.php?id=235 
+* https://faa.ao/pagina/perfil-estadomaior
+* https://faa.ao/exe/perfil-exe
+* https://faa.ao/fan/comandante_fan
+* https://faa.ao/mga/comandante_mga
+* http://www.caboverde-info.com/eng/Identity/Personalities/Jorge-Carlos-de-Almeida-Fonseca
+* https://www.fa.gov.cv › biog-cemfa
+* https://cplp.defesa.pt/CEMGFA
+* http://www.general-embalo.com/#fonction
+* https://information.tv5monde.com/afrique/algerie-qui-est-said-chengriha-le-nouveau-chef-de-l-armee-338814 * https://www.jeuneafrique.com/1011366/politique/algerie-le-chef-detat-major-said-chengriha-imprime-sa-marque/
+* https://www.guineaecuatorialpress.com/noticias/JEFATURA%20DEL%20ESTADO
+* http://www.allgov.com/news/appointments-and-resignations/ambassador-to-the-united-states-from-the-gambia-who-is-sheikh-omar-faye-160116?news=858116
+* http://news.acotonou.com/h/94464.html
+* https://www.24haubenin.info/?A-la-decouverte-du-Capitaine-de-vaisseau-BADOU-E-Albert-Chef-d-Etat-major-des
+* https://sn.usembassy.gov/afafrica-general-leads-team-to-senegal-solidifies-bond-with-partner-air-force/
+* https://www.aa.com.tr/fr/afrique/burkina-faso-nouvelles-nominations-%C3%A0-la-t%C3%AAte-de-larm%C3%A9e/2384887
+* http://www.dsia.bj/doc_num.php?explnum_id=37
+* https://www.facebook.com/581027258920830/posts/qui-est-patrick-jean-baptiste-aho-patrick-jean-baptiste-aho-nouveau-chef-detat-m/749888005368087/
+* https://www.jeuneafrique.com/203764/politique/ren-claude-meka/
+* https://www.bbc.com/news/world-africa-56836109
+* https://www.skynewsarabia.com/middle-east/1261742-%D9%85%D8%AD%D9%85%D8%AF-%D9%88%D9%84%D8%AF-%D8%A7%D9%84%D8%B4%D9%8A%D8%AE-%D8%A7%D9%84%D8%BA%D8%B2%D9%88%D8%A7%D9%86%D9%8A-%D9%87%D9%88-%D8%B1%D9%8A%D9%94%D9%8A%D8%B3-%D9%85%D9%88%D8%B1%D9%8A%D8%AA%D8%A7%D9%86%D9%8A%D8%A7-%D8%A7%D9%84%D8%AC%D8%AF%D9%8A%D8%AF%D8%9F
+* http://armee.mr/ 
+* https://www.jeuneafrique.com/mag/606878/politique/g5-sahel-le-mauritanien-hanana-ould-sidi-nouveau-patron-de-la-force-conjointe-antiterroriste/
+* https://peoplepill.com/people/azali-assoumani
+* https://docplayer.fr/138062158-Le-general-guy-blanchard-okoi-nouveau-chef-d-etat-major-general.html
+* http://www.mod.gov.sl/aboutus-jfc-sullay.html
+* https://business.abidjan.net/qui/11-defense-et-securite/4188-doumbia-lassina
+* https://lefaso.net/spip.php?article105850
+* https://www.mod.gov.rw/rdf/leaders
+* https://mod.gov.lr/
+* https://www.mod.gov.rw/rdf/leaders/air-force-chief-of-staff
+* https://www.lesahel.org/passations-de-commandement-a-letat-major-de-larmee-de-terre-et-celui-de-larmee-de-lair-le-general-de-brigade-abo-tague-mahamadou-a-la-tete-de-larmee-de-t/
+* https://mod.gov.lr/the-forces/chief-of-staff-cos-2/
+* https://statehouse.gov.sl/the-president-2/the-president/
+* http://www.mod.gov.sl/md-kellie.html
+* https://mod.gov.lr/the-forces/23-infantry-brigade/23rd-infantry-brigade-commander/
+* https://mod.gov.lr/the-forces/the-liberian-coast-guard/
+* https://www.csis.org/analysis/guinea-causes-and-consequences-west-africas-latest-coup
+* https://starrfm.com.gh/
+* https://gafonline.mil.gh/message/cos
+* https://www.graphic.com.gh/ 
+* https://gafonline.mil.gh/message/cds
+* https://cplp.defesa.pt/MDN/CV%20Ministro%20da%20Defesa%20Nacional%20GB%20Sandji%20Fati.pdf?Mobile=1&Source=%2F%5Flayouts%2Fmobile%2Fview%2Easpx%3FList%3D6a7ea74c%252D403d%252D4253%252D885c%252Dac52a98b6e32%26View%3De50892db%252D5f15%252D4544%252D9a74%252D5a3c5526e34f%26CurrentPage%3D1
+* https://www.gabonreview.com/forces-armees-gabonaises-le-general-ollame-ndong-succede-a-bibaye-itandas/
+* https://www.rfi.fr/fr/afrique/20200821-colonel-assimi-go%C3%AF-t%C3%AAte-junte-militaire-mali
+* https://www.jeuneafrique.com/1031853/politique/ce-quil-faut-savoir-sur-assimi-goita-le-nouvel-homme-fort-du-mali/
+* https://www.alwihdainfo.com/Tchad-Qui-est-le-nouveau-CEMGA-general-Abakar-Abdelkerim-Il-se-confie-a-Alwihda_a82049.html
+* https://www.thenewhumanitarian.org/report/58146/uganda-profile-yoweri-kaguta-museveni
+* https://observer.ug/index.php?option=com_content&view=article&id=25566:-newarmy-big-wigs-who-are-they
+* https://web.archive.org/web/20060423034626/http://www.newvision.co.ug/D/9/38/494094
+* http://www.tonganoxiemirror.com/news/2008/jun/13/leavenworth_county_gets_international_vip/
+* https://flashugnews.com/muhoozi-kainerugaba-biography-family-wife-early-life-and-education/
+* http://www.defence.go.ug/updf/airforces
+* https://www.redpepper.co.ug/2013/05/m7-promotes-more-updf-officers-kayihura-now-general/
+* https://mod.go.ke/meet-our-team-leaders/
+* https://mod.go.ke/meet-our-team-leaders/
+* https://mod.go.ke/meet-our-team-leaders/
+* https://mod.go.ke/meet-our-team-leaders/
+* https://www.tpdf.mil.tz/biography/bio
+* https://www.tpdf.mil.tz/biography/test
+* https://www.presidence.gov.bi/
+* https://www.bbc.com/gahuza/amakuru-53151343
+* https://www.paulkagame.com/biography/
+* https://www.mod.gov.rw/ministry/leaders
+* https://gafonline.mil.gh/message/cas
+* https://www.mod.gov.rw/rdf/leaders/army-chief-of-staff
+* https://gafonline.mil.gh/message/cns
+* https://www.pmo.gov.et/pm/
+* https://borkena.com/2021/07/20/ethiopian-defense-chief-of-staff-berhanu-jula-breaks-his-silence/
+* https://www.un.org/press/en/2014/sga1525.doc.htm
+* https://www.portaldogoverno.gov.mz/por/Media/Files/Biografia-Nyusi
+* https://www.bbc.com/news/world-africa-41995876
+* https://www.dw.com/en/emmerson-mnangagwa-the-crocodile-who-snapped-back/a-41396645
+* https://nehandaradio.com/2018/11/10/muchinguri-kashiri-makes-history/
+* https://www.voazimbabwe.com/a/zimbabwe-i-did-not-kill-general-josiah-tongogara/4718182.html
+* https://www.africa-confidential.com/article/id/12206/Old_ZANU-PF_in_new_bottles
+* https://www.zimeye.net/2021/03/02/the-things-you-need-to-know-about-army-general-philip-valerio-sibanda/
+* https://www.herald.co.zw/generals-death-a-blow-to-the-nation/
+* http://www.zna.gov.zw/index.php?option=com_content&view=article&id=133&Itemid=584
+* http://www.defence.gov.zw/airforce-of-zimbabwe
+* http://news.bbc.co.uk/2/hi/programmes/panorama/1861719.stm
+* https://northafricapost.com/52523-who-is-gen-el-farouk-new-inspector-general-of-moroccos-royal-armed-forces.html
+* https://www.jeuneafrique.com/1237431/politique/maroc-belkhir-el-farouk-dix-choses-a-savoir-sur-le-nouveau-numero-2-de-larmee/
+* http://news.aniamey.com/h/95653.html
+* https://www.lesahel.org/passations-de-commandement-a-letat-major-de-larmee-de-terre-et-celui-de-larmee-de-lair-le-general-de-brigade-abo-tague-mahamadou-a-la-tete-de-larmee-de-t/
+* https://www.un.org/sg/en/content/profiles/general-birame-diop
+* https://defense.gouv.tg/chef-detat-major-general/
+* https://kinkelibaa.info/cheikh-wade-le-destin-glorieux-dun-cemga/
+* https://www.voanews.com/a/africa_standout-general-picked-lead-somalias-al-shabab-fight/6174873.html
+* https://theconversation.com/eritreas-isaias-afwerki-a-tactical-authoritarian-who-might-be-president-for-life-147963
+* https://www.parliament.gov.zm/node/9415
+* http://www.daily-mail.co.zm/a-close-up-with-ambrose-lufuma/
+* https://www.standardmedia.co.ke/world/article/2001422239/zambian-new-president-hichilema-fires-top-army-police-commanders
+* https://mod.gov.na/minister
+* https://mod.gov.na/documents/264813/783518/CHIEF+OF+THE+NAMIBIAN+DEFENCE+FORCE.pdf/edc77384-ed74-4c4b-8dad-fc2c8ef874f8
+https://mod.gov.na/documents/264813/286599/Biograph+of+Maj+Gen+Alueendo.pdf/5c488dda-362f-4ca5-99bd-c3e2cb2d2251
+* https://mod.gov.na/documents/264813/283588/SHAENDE+PROFILE.pdf/c0fac467-2ec5-4f47-bbf7-55a04098c299
+
+
